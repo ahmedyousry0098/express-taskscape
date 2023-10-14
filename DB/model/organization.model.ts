@@ -1,9 +1,9 @@
 import mongoose, { Schema, InferSchemaType } from 'mongoose'
 import { IOrganization } from '../../src/types/organization.types'
 
-export type organizationSchemaType = InferSchemaType<typeof organizationSchema>
+export type OrganizationSchemaType = InferSchemaType<typeof organizationSchema>
 
-const organizationSchema = new Schema<Omit<IOrganization, '_id'>>({
+const organizationSchema = new Schema<IOrganization>({
     organization_name: {
         type: String,
         required: true,
@@ -41,4 +41,4 @@ const organizationSchema = new Schema<Omit<IOrganization, '_id'>>({
     timestamps: true
 })
 
-export const OrganizationModel = mongoose.model<Omit<IOrganization, '_id'>>('Organization', organizationSchema)
+export const OrganizationModel = mongoose.model<IOrganization>('Organization', organizationSchema)

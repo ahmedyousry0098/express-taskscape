@@ -7,6 +7,10 @@ interface ICreateOrgSchema extends Omit<IOrganization, '_id'|'logo'|'isVerified'
     file: IImageFile
 }
 
+interface IObjectId {
+    orgId: string
+}
+
 export const createOrganizationSchema = joi.object<ICreateOrgSchema>({
     organization_name: joi.string().required(),
     company: joi.string().min(3).max(30).required(),
@@ -16,6 +20,6 @@ export const createOrganizationSchema = joi.object<ICreateOrgSchema>({
     industry: joi.string().valid('software development'),
 }).required()
 
-export const getOrganizationSchema = joi.object({
+export const getOrgByIdSchema = joi.object<IObjectId>({
     orgId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
 }).required()

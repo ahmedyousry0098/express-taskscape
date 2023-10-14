@@ -1,12 +1,12 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
-import { OrganizationModel } from "../../../DB/model/organization.model";
+import { OrganizationModel, OrganizationSchemaType } from "../../../DB/model/organization.model";
 import { ResponseError } from "../../utils/errHandling";
 import { ERROR_MESSAGES } from "../../constants/error_messages";
 import cloudinary from "../../utils/cloudinary";
 
 export const createOrganization = async (req: Request, res: Response, next: NextFunction) => {
     const {company} = req.body
-    const existsOrg = await OrganizationModel.findOne({company})
+    const existsOrg = await OrganizationModel.findOne<OrganizationSchemaType>({company})
     if (existsOrg) {
         return next(new ResponseError(ERROR_MESSAGES.conflict('company'), 409))
     }
@@ -29,7 +29,7 @@ export const createOrganization = async (req: Request, res: Response, next: Next
 
 export const getOrganizationById = async (req: Request, res: Response, next: NextFunction) => {
     const {orgId} = req.params
-    const org = await OrganizationModel.findById(orgId)
+    const org = await OrganizationModel.findById<OrganizationSchemaType>(orgId)
     if (!org || org.isDeleted) {
         return next(new ResponseError(ERROR_MESSAGES.notFound('organization'), 404))
     }

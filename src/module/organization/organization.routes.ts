@@ -4,7 +4,7 @@ import { createOrganization, getOrganizationById } from "./organization.controll
 import { asyncHandler } from "../../utils/errHandling";
 import { filesCategoriesSchema } from "../../constants/file_categories";
 import { validate } from "../../middlewares/validate";
-import { createOrganizationSchema, getOrganizationSchema } from "./organization.validation";
+import { createOrganizationSchema, getOrgByIdSchema } from "./organization.validation";
 
 const router = Router()
 
@@ -17,7 +17,7 @@ router.post(
 
 router.get(
     '/:orgId',
-    validate(getOrganizationSchema),
+    validate(getOrgByIdSchema),
     asyncHandler(getOrganizationById)
 )
 
