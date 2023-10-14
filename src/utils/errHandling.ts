@@ -6,9 +6,9 @@ export class ResponseError extends Error {
     }
 }
 
-export const asyncHandler = (Api: Promise<RequestHandler>): RequestHandler => {
+export const asyncHandler = (Api: Function): RequestHandler => {
     return (req: Request, res: Response, next: NextFunction) => (
-        Api.catch((err) => {
+        Api(req, res, next).catch((err: Error) => {
             return next(err)
         })
     )
