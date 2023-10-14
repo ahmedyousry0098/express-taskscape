@@ -26,3 +26,12 @@ export const createOrganization = async (req: Request, res: Response, next: Next
     }
     return res.status(201).json({message: 'done', organization: createdOrg})
 }
+
+export const getOrganizationById = async (req: Request, res: Response, next: NextFunction) => {
+    const {orgId} = req.params
+    const org = await OrganizationModel.findById(orgId)
+    if (!org || org.isDeleted) {
+        return next(new ResponseError(ERROR_MESSAGES.notFound('organization'), 404))
+    }
+    return res.status(200).json({message: 'done', organization: org})
+}

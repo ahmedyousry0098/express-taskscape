@@ -28,6 +28,14 @@ const organizationSchema = new Schema<Omit<IOrganization, '_id'>>({
     industry: {
         type: String,
         default: 'software development'
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false
+    },
+    isVerified: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true

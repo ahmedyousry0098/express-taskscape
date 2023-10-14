@@ -8,4 +8,6 @@ export interface IOrganization {
     industry: string // default field in db -> software development
     headQuarters: string;
     logo: IImage;
+    isDeleted: boolean
+    isVerified: boolean
 }
