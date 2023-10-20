@@ -8,16 +8,16 @@ import { confirmMailTemp } from "../../utils/mail_templates/confirm_mail";
 import {sign} from 'jsonwebtoken'
 
 export const createAdmin: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-    const {email, orgId} = req.body
+    const {email, organization} = req.body
     const adminExist = await AdminModel.findOne<AdminSchemaType>({email})
     if (adminExist) {
         return next(new ResponseError(`${ERROR_MESSAGES.conflict('admin account')}`, 409))
     }
-    const org = await OrganizationModel.findById(orgId)
+    const org = await OrganizationModel.findById(organization)
     if (!org) {
         return next(new ResponseError('organization not exist'))
     }
-    const newAdmin = new AdminModel({...req.body, organization: orgId})
+    const newAdmin = new AdminModel({...req.body, organization})
     const token = sign(
         {
             _id: newAdmin._id.toString(), 
