@@ -1,10 +1,15 @@
 {
   "name": "taskspace-backend",
   "version": "1.0.0",
-  "description": "",
+  "description": "ITI Final Project",
   "main": "index.js",
   "scripts": {
-    "start:dev": "nodemon index.ts"
+    "start:dev": "nodemon index.ts",
+    "start": "node index.ts",
+    "vercel-build": "tsc index.ts"
+  },
+  "engines": {
+    "node": "18.13.0"
   },
   "keywords": [],
   "author": "",
