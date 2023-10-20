@@ -2,8 +2,9 @@ import mongoose, { Schema, InferSchemaType } from 'mongoose'
 import { IOrganization } from '../../src/types/organization.types'
 
 export type OrganizationSchemaType = InferSchemaType<typeof organizationSchema>
+interface IOrganizationDocument extends IOrganization {}
 
-const organizationSchema = new Schema<IOrganization>({
+const organizationSchema = new Schema<IOrganizationDocument>({
     organization_name: {
         type: String,
         required: true,
@@ -41,4 +42,4 @@ const organizationSchema = new Schema<IOrganization>({
     timestamps: true
 })
 
-export const OrganizationModel = mongoose.model<IOrganization>('Organization', organizationSchema)
+export const OrganizationModel = mongoose.model<IOrganizationDocument>('Organization', organizationSchema)

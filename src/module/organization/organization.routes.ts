@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { uploadFile } from "../../utils/uploadFile";
-import { createOrganization, getOrganizationById } from "./organization.controller";
+import { confirmOrganization, createOrganization, getOrganizationById } from "./organization.controller";
 import { asyncHandler } from "../../utils/errHandling";
 import { filesCategoriesSchema } from "../../constants/file_categories";
 import { validate } from "../../middlewares/validate";
@@ -19,6 +19,11 @@ router.get(
     '/:orgId',
     validate(getOrgByIdSchema),
     asyncHandler(getOrganizationById)
+)
+
+router.get(
+    '/:token/confirm-organization',
+    asyncHandler(confirmOrganization)
 )
 
 export default router
