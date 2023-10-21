@@ -1,3 +1,7 @@
+process.on('uncaughtException', (err) => {
+    console.error(err)
+})
+
 import express, { NextFunction, Request, Response } from 'express'
 import { connectDB } from './DB/connection'
 import { globalErrorHandler } from './src/utils/errHandling'
@@ -11,7 +15,8 @@ const app = express()
 const port = process.env.PORT
 
 app.use(cors({
-    origin: '*'
+    origin: "*",
+    maxAge: 600
 }))
 
 app.use(express.urlencoded({extended: false}))
@@ -21,12 +26,15 @@ connectDB()
 
 app.use('/organization', organizationRoutes)
 app.use('/admin', adminRoutes)
+app.use(globalErrorHandler)
 
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
     return res.status(404).json({message: 'page not found'})
 })
 
-app.use(globalErrorHandler)
+process.on('unhandledRejection', (err) => {
+    console.error(`${err}`)
+})
 
 app.listen(port, () => {
     console.log(`app running on port ${port}`);

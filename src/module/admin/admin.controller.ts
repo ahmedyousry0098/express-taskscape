@@ -21,10 +21,10 @@ export const createAdmin: RequestHandler = async (req: Request, res: Response, n
     const newAdmin = new AdminModel({...req.body, organization})
     const token = sign(
         {
-            _id: newAdmin._id.toString(), 
+            _id: org._id.toString(), 
             email: newAdmin.email
         }, 
-        `${process.env.TOKEN_SIGNATURE}`,
+        `${process.env.JWT_SIGNATURE}`,
         {expiresIn: 60*60*24}
     )
     const confirmationLink = `${req.protocol}://${req.headers.host}/organization/${token}/confirm-organization`
@@ -46,10 +46,10 @@ export const login: RequestHandler = async (req: Request, res: Response, next: N
     const {email, password} = req.body
     const admin = await AdminModel.findOne({email})
     if (!admin) {
-        return new ResponseError('In-valid credentials')
+        return next(new ResponseError('In-valid credentials', 400))
     }
     if (!compareSync(password, admin.password)) {
-        return new ResponseError('In-valid credentials')
+        return next(new ResponseError('In-valid credentials', 400))
     }
     const org = await OrganizationModel.findById<OrganizationSchemaType>(admin.organization)
     if (!org || org.isDeleted) {
@@ -61,7 +61,7 @@ export const login: RequestHandler = async (req: Request, res: Response, next: N
                 _id: admin._id.toString(), 
                 email: admin.email
             }, 
-            `${process.env.TOKEN_SIGNATURE}`,
+            `${process.env.JWT_SIGNATURE}`,
             {expiresIn: 60*60*24}
         )
         const confirmationLink = `${req.protocol}://${req.headers.host}/organization/${token}/confirm-organization`
@@ -71,7 +71,7 @@ export const login: RequestHandler = async (req: Request, res: Response, next: N
             html: confirmMailTemp({to: admin.email, confirmationLink })
         })
         if (!mailInfo.accepted.length) {
-            return new ResponseError(`${ERROR_MESSAGES.unavailableService}`)
+            return next(new ResponseError(`${ERROR_MESSAGES.unavailableService}`))
         }
         return next(new ResponseError('Organization not verified yet, please check your mail to verify it'))
     }
@@ -80,7 +80,7 @@ export const login: RequestHandler = async (req: Request, res: Response, next: N
             _id: admin._id.toString(), 
             email: admin.email
         }, 
-        `${process.env.TOKEN_SIGNATURE}`,
+        `${process.env.JWT_SIGNATURE}`,
         {expiresIn: 60*60*24}
     )
     return res.status(200).json({message: 'Done', token})

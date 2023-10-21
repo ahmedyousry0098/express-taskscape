@@ -46,10 +46,10 @@ export const getOrganizationById = async (req: Request, res: Response, next: Nex
 export const confirmOrganization = async (req: Request, res: Response, next: NextFunction) => {
     const {token} = req.params
     const decoded = Jwt.verify(token, `${process.env.JWT_SIGNATURE}`) as IJwtPayload
-    if (!decoded?.id) {
+    if (!decoded?._id) {
         return next(new ResponseError('In-valid Authorization Key'))
     }
-    const org = await OrganizationModel.findByIdAndUpdate<OrganizationSchemaType>(decoded.id, {isVerified: true}, {new: true})
+    const org = await OrganizationModel.findByIdAndUpdate<OrganizationSchemaType>(decoded._id, {isVerified: true}, {new: false})
     if (!org || org.isDeleted) {
         return next(new ResponseError(`${ERROR_MESSAGES.notFound('Organization')}`))
     }
