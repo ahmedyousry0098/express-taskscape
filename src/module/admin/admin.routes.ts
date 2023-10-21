@@ -1,11 +1,12 @@
 import {Router} from 'express'
-import { createAdmin } from './admin.controller'
+import { createAdmin, login } from './admin.controller'
 import { asyncHandler } from '../../utils/errHandling'
 import { validate } from '../../middlewares/validate'
-import { CreateAdminSchema } from './admin.validation'
+import { registerAdminSchema, loginAdminSchema } from './admin.validation'
 
 const router: Router = Router()
 
-router.post('/', validate(CreateAdminSchema), asyncHandler(createAdmin))
+router.post('/register', validate(registerAdminSchema), asyncHandler(createAdmin))
+router.post('/login', validate(loginAdminSchema), asyncHandler(login))
 
 export default router

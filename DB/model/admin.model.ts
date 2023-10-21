@@ -3,7 +3,7 @@ import { IAdmin } from '../../src/types/admin.types';
 import {hash, genSalt} from 'bcryptjs'
 
 export type AdminSchemaType = InferSchemaType<typeof adminSchema>
-interface IAdminDocument extends IAdmin {}
+interface IAdminDocument extends mongoose.Document<typeof Types.ObjectId>, IAdmin {}
 
 const adminSchema = new Schema<IAdminDocument>({
     adminName: {

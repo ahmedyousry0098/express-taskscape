@@ -6,6 +6,7 @@ import { ERROR_MESSAGES } from "../../constants/error_messages";
 import { sendMail } from "../../utils/sendMail";
 import { confirmMailTemp } from "../../utils/mail_templates/confirm_mail";
 import {sign} from 'jsonwebtoken'
+import { compareSync } from "bcryptjs";
 
 export const createAdmin: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     const {email, organization} = req.body
@@ -39,4 +40,48 @@ export const createAdmin: RequestHandler = async (req: Request, res: Response, n
         return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
     }
     return res.status(201).json({message: 'Please checkout your mail to confirm your account'})
+}
+
+export const login: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    const {email, password} = req.body
+    const admin = await AdminModel.findOne({email})
+    if (!admin) {
+        return new ResponseError('In-valid credentials')
+    }
+    if (!compareSync(password, admin.password)) {
+        return new ResponseError('In-valid credentials')
+    }
+    const org = await OrganizationModel.findById<OrganizationSchemaType>(admin.organization)
+    if (!org || org.isDeleted) {
+        return next(new ResponseError(`${ERROR_MESSAGES.notFound('Organization')}`))
+    }
+    if (!org.isVerified) {
+        const token = sign(
+            {
+                _id: admin._id.toString(), 
+                email: admin.email
+            }, 
+            `${process.env.TOKEN_SIGNATURE}`,
+            {expiresIn: 60*60*24}
+        )
+        const confirmationLink = `${req.protocol}://${req.headers.host}/organization/${token}/confirm-organization`
+        const mailInfo = await sendMail({
+            to: admin.email,
+            subject: "Confirm Taskspace Organization",
+            html: confirmMailTemp({to: admin.email, confirmationLink })
+        })
+        if (!mailInfo.accepted.length) {
+            return new ResponseError(`${ERROR_MESSAGES.unavailableService}`)
+        }
+        return next(new ResponseError('Organization not verified yet, please check your mail to verify it'))
+    }
+    const token = sign(
+        {
+            _id: admin._id.toString(), 
+            email: admin.email
+        }, 
+        `${process.env.TOKEN_SIGNATURE}`,
+        {expiresIn: 60*60*24}
+    )
+    return res.status(200).json({message: 'Done', token})
 }

@@ -1,8 +1,8 @@
-import mongoose, { Schema, InferSchemaType } from 'mongoose'
+import mongoose, { Schema, InferSchemaType, Types } from 'mongoose'
 import { IOrganization } from '../../src/types/organization.types'
 
 export type OrganizationSchemaType = InferSchemaType<typeof organizationSchema>
-interface IOrganizationDocument extends IOrganization {}
+interface IOrganizationDocument extends mongoose.Document<typeof Types.ObjectId>, IOrganization {}
 
 const organizationSchema = new Schema<IOrganizationDocument>({
     organization_name: {

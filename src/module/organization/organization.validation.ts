@@ -3,7 +3,7 @@ import { CUSTOM_FIELDS_SCHEMAS } from '../../constants/schema_validation_fields'
 import { IOrganization } from '../../types/organization.types'
 import { IImageFile } from '../../types/image.types'
 
-interface ICreateOrgSchema extends Omit<IOrganization, '_id'|'logo'|'isVerified'|'isDeleted'>{
+interface ICreateOrgSchema extends Omit<IOrganization, 'logo'|'isVerified'|'isDeleted'>{
     file: IImageFile
 }
 
