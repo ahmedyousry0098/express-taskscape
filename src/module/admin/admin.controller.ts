@@ -21,10 +21,10 @@ export const createAdmin: RequestHandler = async (req: Request, res: Response, n
     const newAdmin = new AdminModel({...req.body, organization})
     const token = sign(
         {
-            _id: newAdmin._id.toString(), 
+            _id: org._id.toString(), 
             email: newAdmin.email
         }, 
-        `${process.env.TOKEN_SIGNATURE}`,
+        `${process.env.JWT_SIGNATURE}`,
         {expiresIn: 60*60*24}
     )
     const confirmationLink = `${req.protocol}://${req.headers.host}/organization/${token}/confirm-organization`
@@ -61,7 +61,7 @@ export const login: RequestHandler = async (req: Request, res: Response, next: N
                 _id: admin._id.toString(), 
                 email: admin.email
             }, 
-            `${process.env.TOKEN_SIGNATURE}`,
+            `${process.env.JWT_SIGNATURE}`,
             {expiresIn: 60*60*24}
         )
         const confirmationLink = `${req.protocol}://${req.headers.host}/organization/${token}/confirm-organization`
@@ -80,7 +80,7 @@ export const login: RequestHandler = async (req: Request, res: Response, next: N
             _id: admin._id.toString(), 
             email: admin.email
         }, 
-        `${process.env.TOKEN_SIGNATURE}`,
+        `${process.env.JWT_SIGNATURE}`,
         {expiresIn: 60*60*24}
     )
     return res.status(200).json({message: 'Done', token})

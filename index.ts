@@ -10,12 +10,24 @@ config({path: './.env'})
 const app = express()
 const port = process.env.PORT
 
-app.use(cors({
-    origin: '*'
+app.use(cors<Request>({
+    origin: "*",
+    methods: "*",
+    credentials: false
 }))
+app.options('*', cors())
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*'); // Allow requests from any domain
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    next();
+});
+  
 
 app.use(express.urlencoded({extended: false}))
 app.use(express.json())
+
 
 connectDB()
 
