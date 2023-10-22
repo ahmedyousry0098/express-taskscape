@@ -8,16 +8,16 @@ import { ResponseError } from '../../utils/errHandling';
 import { ERROR_MESSAGES } from '../../constants/error_messages';
 import { sendMail } from '../../utils/sendMail';
 import { notificationMailTemp } from '../../utils/mail_templates/notification_employee_mail';
+import { IAdmin } from '../../types/admin.types';
 
 export const createEmployee: RequestHandler = async (
 	req: Request,
 	res: Response,
 	next: NextFunction
 ) => {
-	// const { adminId } = req.headers;
-	const adminId = req.admin?.id;
+	const admin = req.user;
 	const { email, employeeName, password, role } = req.body;
-	const admin = await AdminModel.findById<AdminSchemaType>({ adminId });
+	// const admin = await AdminModel.findById<AdminSchemaType>({ adminId });
 	const employeeIsExist = await EmployeeModel.findOne<EmployeeSchemaType>({
 		email,
 	});
@@ -26,10 +26,9 @@ export const createEmployee: RequestHandler = async (
 			new ResponseError(`${ERROR_MESSAGES.conflict('Employee account')}`, 409)
 		);
 	}
-
 	const newEmployee = new EmployeeModel({
 		...req.body,
-		createdBy: adminId,
+		createdBy: admin?.id,
 		organization: admin?.organization,
 	});
 
