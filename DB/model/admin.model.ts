@@ -1,11 +1,13 @@
 import mongoose, { Schema, model, Types, InferSchemaType } from 'mongoose';
 import { IAdmin } from '../../src/types/admin.types';
 import { hash, genSalt } from 'bcryptjs';
+import { IOrganizationDocument } from './organization.model';
 
 export type AdminSchemaType = InferSchemaType<typeof adminSchema>;
-interface IAdminDocument
-	extends mongoose.Document<typeof Types.ObjectId>,
-		IAdmin {}
+export interface IAdminDocument extends mongoose.Document<typeof Types.ObjectId>, IAdmin {}
+export interface IAdminWithOrg extends Omit<IAdminDocument, 'organization'> {
+	organization: IOrganizationDocument
+}
 
 const adminSchema = new Schema<IAdminDocument>(
 	{
