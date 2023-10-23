@@ -1,8 +1,8 @@
-import mongoose, {Types} from "mongoose";
+import mongoose, { Types } from 'mongoose';
 
 export interface IAdmin {
-    adminName: string;
-    email: string;
-    password: string;
-    organization: typeof Types.ObjectId;
+	adminName: string;
+	email: string;
+	password: string;
+	organization: typeof Types.ObjectId;
 }
