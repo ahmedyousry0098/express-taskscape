@@ -97,6 +97,17 @@ export const employeeChangePassword: RequestHandler = async (
 	}
 	employee.password = newPassword;
 	employee.lastChangePassword = new Date();
-	await employee.save();
-	return res.status(200).json({ message: 'Password changed successfully!!' });
+	if (!await employee.save()) {
+		return new ResponseError(`${ERROR_MESSAGES.serverErr}`)
+	}
+	const token = sign(
+		{
+			_id: employee._id!.toString(),
+			email: employee.email,
+			role: employee.role,
+		},
+		`${process.env.JWT_SIGNATURE}`,
+		{ expiresIn: 60 * 60 * 24 }
+	);
+	return res.status(200).json({ message: 'Password changed successfully!!', token});
 };

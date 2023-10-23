@@ -7,7 +7,9 @@ interface ICreateOrgSchema extends Omit<IOrganization, 'logo'|'isVerified'|'isDe
     file: IImageFile
 }
 
-interface IUpdateOrgSchema extends Omit<ICreateOrgSchema, 'company'> {}
+interface IUpdateOrgSchema extends Omit<ICreateOrgSchema, 'company'> {
+    orgId: string
+}
 
 interface IOnlyObjectId {
     orgId: string
@@ -32,4 +34,5 @@ export const updateOrganizationSchema = joi.object<IUpdateOrgSchema>({
     headQuarters: joi.string().min(2).max(20),
     file: CUSTOM_FIELDS_SCHEMAS.file,
     industry: joi.string().valid('software development'),
+    orgId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
 })

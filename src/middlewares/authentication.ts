@@ -29,7 +29,7 @@ export const authAdmin: RequestHandler = asyncHandler(async (
 	) as IJwtPayload;
 	const admin = await AdminModel.findById<AdminSchemaType>(decoded._id).populate<{organization: OrganizationSchemaType}>(
 		'organization'
-	).orFail()
+	).orFail(new Error('Admin\'s Organization Not Found'))
 	if (!admin) {
 		return next(new ResponseError('In-valid credentials', 406));
 	}

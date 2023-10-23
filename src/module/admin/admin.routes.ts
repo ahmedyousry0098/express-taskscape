@@ -19,7 +19,7 @@ router.post(
 	asyncHandler(login)
 );
 router.patch(
-	'/:adminId/changepassword',
+	'/changepassword',
 	validate(changePasswordSchema), // من عند الامبلوي مودل كدا خالصين :D
 	authAdmin,
 	asyncHandler(changeAdminPassword)

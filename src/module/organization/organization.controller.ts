@@ -7,7 +7,7 @@ import Jwt from "jsonwebtoken";
 import { IJwtPayload } from "../../interfaces/jwt.interface";
 import { AdminModel, AdminSchemaType } from "../../../DB/model/admin.model";
 
-export const createOrganization = async (req: Request, res: Response, next: NextFunction) => {
+export const createOrganization: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     const {company} = req.body
     const existsOrg = await OrganizationModel.findOne<OrganizationSchemaType>({company})
     if (existsOrg) {
@@ -31,7 +31,7 @@ export const createOrganization = async (req: Request, res: Response, next: Next
     return res.status(201).json({message: 'done', organization: createdOrg})
 }
 
-export const getOrganizationById = async (req: Request, res: Response, next: NextFunction) => {
+export const getOrganizationById: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     const {orgId} = req.params
     const org = await OrganizationModel.findById<OrganizationSchemaType>(orgId)
     if (!org || org.isDeleted) {
@@ -44,18 +44,18 @@ export const getOrganizationById = async (req: Request, res: Response, next: Nex
     return res.status(200).json({message: 'done', organization: org, admin: orgAdmin})
 }
 
-export const confirmOrganization = async (req: Request, res: Response, next: NextFunction) => {
+export const confirmOrganization: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     const {token} = req.params
     const decoded = Jwt.verify(token, `${process.env.JWT_SIGNATURE}`) as IJwtPayload
-    if (!decoded?.id) {
+    if (!decoded?._id) {
         return next(new ResponseError('In-valid Authorization Key'))
     }
-    const org = await OrganizationModel.findByIdAndUpdate<OrganizationSchemaType>(decoded.id, {isVerified: true}, {new: true})
+    const org = await OrganizationModel.findByIdAndUpdate<OrganizationSchemaType>(decoded._id, {isVerified: true}, {new: false})
     if (!org || org.isDeleted) {
         return next(new ResponseError(`${ERROR_MESSAGES.notFound('Organization')}`))
     }
     if (org.isVerified) {
-        return next(new ResponseError('Organization Already Verified', 403))
+        return next(new ResponseError('Organization Already Verified', 400))
     }
     return res.status(200).json({message: 'Organization Verified Successfully'})
 }

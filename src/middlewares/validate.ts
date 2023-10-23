@@ -12,7 +12,6 @@ export const validate = (schema: ObjectSchema) => {
 			abortEarly: false,
 		});
 		let messages: string[] = [];
-		console.log(requestKeys);
 		if (result.error?.details) {
 			for (let err of result.error.details) {
 				messages.push(err.message);
