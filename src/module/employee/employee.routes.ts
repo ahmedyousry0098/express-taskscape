@@ -29,5 +29,5 @@ router.patch(
 	validate(changePasswordSchema),
 	asyncHandler(employeeChangePassword)
 );
+
 export default router;
-//
