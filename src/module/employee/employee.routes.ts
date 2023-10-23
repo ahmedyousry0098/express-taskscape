@@ -1,9 +1,17 @@
 import { Router } from 'express';
 import { validate } from '../../middlewares/validate';
-import { createEmployeeSchema } from './employee.validation';
+import {
+	changePasswordSchema,
+	createEmployeeSchema,
+} from './employee.validation';
 import { asyncHandler } from '../../utils/errHandling';
-import { createEmployee } from './employee.controller';
-import { authAdmin } from '../../middlewares/authentication';
+import {
+	createEmployee,
+	employeeChangePassword,
+	employeeLogin,
+} from './employee.controller';
+import { authAdmin, authEmployee } from '../../middlewares/authentication';
+import { loginAdminSchema } from '../admin/admin.validation';
 
 const router: Router = Router();
 
@@ -14,4 +22,12 @@ router.post(
 	asyncHandler(createEmployee)
 );
 
+router.post('/login', validate(loginAdminSchema), asyncHandler(employeeLogin));
+router.patch(
+	'/changepassword',
+	authEmployee,
+	validate(changePasswordSchema),
+	asyncHandler(employeeChangePassword)
+);
 export default router;
+//

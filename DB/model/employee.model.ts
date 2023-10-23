@@ -4,7 +4,7 @@ import { genSalt, hash } from 'bcryptjs';
 
 export type EmployeeSchemaType = InferSchemaType<typeof employeeSchema>;
 
-interface IEmployeeDocument
+export interface IEmployeeDocument
 	extends mongoose.Document<typeof Types.ObjectId>,
 		IEmployee {}
 
@@ -18,6 +18,8 @@ const employeeSchema = new Schema<IEmployeeDocument>(
 			enum: ['scrumMaster', 'member'],
 			default: 'member',
 		},
+		lastChangePassword: { type: Date },
+
 		createdBy: { type: Types.ObjectId, ref: 'Admin' },
 		organization: { type: Types.ObjectId, ref: 'Organization' },
 	},

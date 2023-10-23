@@ -3,7 +3,7 @@ import { IEmployee } from '../../types/employee.types';
 import { CUSTOM_FIELDS_SCHEMAS } from '../../constants/schema_validation_fields';
 import { AdminSchemaType } from '../../../DB/model/admin.model';
 
-interface ICreateEmployeeSchema extends IEmployee {}
+// interface ICreateEmployeeSchema extends IEmployee {}
 interface ICreateEmployeeSchema extends IEmployee {
 	admin?: string;
 }
@@ -15,3 +15,12 @@ export const createEmployeeSchema = Joi.object<ICreateEmployeeSchema>({
 }).required();
 
 //login validation same as loginAdminSchema
+
+interface IChangePassword extends IEmployee {
+	newPassword?: string;
+}
+
+export const changePasswordSchema = Joi.object<IChangePassword>({
+	password: Joi.string().required(),
+	newPassword: Joi.string().required(),
+});
