@@ -1,5 +1,5 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
-import { AdminModel, AdminSchemaType } from '../../../DB/model/admin.model';
+import { AdminModel, AdminSchemaType, IAdminWithOrg } from '../../../DB/model/admin.model';
 import {
 	OrganizationModel,
 	OrganizationSchemaType,
@@ -109,3 +109,26 @@ export const login: RequestHandler = async (
 	);
 	return res.status(200).json({ message: 'Done', token });
 };
+
+export const changeAdminPassword: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+	const admin = req.admin as IAdminWithOrg
+	const { password, newPassword } = req.body;
+	if (!compareSync(password, admin.password)) {
+		return next(new ResponseError('In-valid password', 400));
+	}
+	admin.password = newPassword;
+	admin.lastChangePassword = new Date();
+	if (!await admin.save()) {
+		return new ResponseError(`${ERROR_MESSAGES.serverErr}`)
+	}
+	const token = sign(
+		{
+			_id: admin._id!.toString(),
+			email: admin.email,
+			role: 'admin',
+		},
+		`${process.env.JWT_SIGNATURE}`,
+		{ expiresIn: 60 * 60 * 24 }
+	);
+	return res.status(200).json({ message: 'Password changed successfully!!', token});
+}

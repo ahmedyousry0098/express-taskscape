@@ -18,7 +18,8 @@ export const createOrganization = async (req: Request, res: Response, next: Next
         const {public_id, secure_url} = await cloudinary.uploader.upload(
             req.file.path,
             {
-                folder: `${process.env.APP_TITLE}/org/${createdOrg.company}`
+                folder: `${process.env.APP_TITLE}/org`,
+                public_id: `org_${createdOrg._id.toString()}`
             }
         )        
         if (!public_id || !secure_url) return next(new ResponseError(ERROR_MESSAGES.unavailableService, 503))
@@ -57,4 +58,39 @@ export const confirmOrganization = async (req: Request, res: Response, next: Nex
         return next(new ResponseError('Organization Already Verified', 403))
     }
     return res.status(200).json({message: 'Organization Verified Successfully'})
+}
+
+export const updateOrganization: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    const {orgId} = req.params
+    const admin = req.admin
+    const org = await OrganizationModel.findById<OrganizationSchemaType>(orgId)
+    if (!org) {
+        return next(new ResponseError(`${ERROR_MESSAGES.notFound('Organization')}`))
+    }
+    if (org._id?.toString() !== admin?.organization._id?.toString()) {
+        return next(new ResponseError(`Sorry, You not organization admin and havn't permissions to modify organization`))
+    }
+    if (req.file) {
+        const {public_id, secure_url} = await cloudinary.uploader.upload(
+            req.file.path,
+            {
+                folder: `${process.env.APP_TITLE}/org`,
+                public_id: `org_${org._id?.toString()}`
+            },
+            (err, res) => {
+                if (err) {
+                    return next(new ResponseError(`Cannot update logo, please try again`))
+                }
+                return res
+            }
+        )
+        req.body.logo = {public_id, secure_url}
+    }
+    const updatedOrganization = await OrganizationModel.findByIdAndUpdate<OrganizationSchemaType>
+    (
+        orgId, 
+        {...req.body}, 
+        {new: true}
+    )
+    return res.status(200).json({message: 'Done', updatedOrganization})
 }

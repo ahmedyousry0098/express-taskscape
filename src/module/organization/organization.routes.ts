@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { uploadFile } from "../../utils/uploadFile";
-import { confirmOrganization, createOrganization, getOrganizationById } from "./organization.controller";
+import { confirmOrganization, createOrganization, getOrganizationById, updateOrganization } from "./organization.controller";
 import { asyncHandler } from "../../utils/errHandling";
 import { filesCategoriesSchema } from "../../constants/file_categories";
 import { validate } from "../../middlewares/validate";
-import { createOrganizationSchema, getOrgByIdSchema } from "./organization.validation";
+import { createOrganizationSchema, getOrgByIdSchema, updateOrganizationSchema } from "./organization.validation";
+import { authAdmin } from "../../middlewares/authentication";
 
 const router = Router()
 
@@ -24,6 +25,14 @@ router.get(
 router.get(
     '/:token/confirm-organization',
     asyncHandler(confirmOrganization)
+)
+
+router.put(
+    '/:orgId/update',
+    uploadFile(filesCategoriesSchema.images).single('logo'),
+    validate(updateOrganizationSchema),
+    authAdmin,
+    asyncHandler(updateOrganization)
 )
 
 export default router
