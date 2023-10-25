@@ -23,8 +23,9 @@ router.post(
 );
 
 router.post('/login', validate(loginAdminSchema), asyncHandler(employeeLogin));
-router.patch(
-	'/changepassword',
+
+router.get(
+	'/changepassword/:employeeId',
 	authEmployee,
 	validate(changePasswordSchema),
 	asyncHandler(employeeChangePassword)

@@ -1,5 +1,9 @@
 import { NextFunction, Request, RequestHandler, Response } from 'express';
-import { AdminModel, AdminSchemaType, IAdminWithOrg } from '../../../DB/model/admin.model';
+import {
+	AdminModel,
+	AdminSchemaType,
+	IAdminWithOrg,
+} from '../../../DB/model/admin.model';
 import {
 	OrganizationModel,
 	OrganizationSchemaType,
@@ -10,6 +14,11 @@ import { sendMail } from '../../utils/sendMail';
 import { confirmMailTemp } from '../../utils/mail_templates/confirm_mail';
 import { sign } from 'jsonwebtoken';
 import { compareSync } from 'bcryptjs';
+import { UserRole } from '../../constants/user.role';
+import {
+	EmployeeModel,
+	EmployeeSchemaType,
+} from '../../../DB/model/employee.model';
 
 export const createAdmin: RequestHandler = async (
 	req: Request,
@@ -102,7 +111,7 @@ export const login: RequestHandler = async (
 		{
 			_id: admin._id.toString(),
 			email: admin.email,
-			role: 'admin',
+			role: UserRole.ADMIN,
 		},
 		`${process.env.JWT_SIGNATURE}`,
 		{ expiresIn: 60 * 60 * 24 }
@@ -110,25 +119,54 @@ export const login: RequestHandler = async (
 	return res.status(200).json({ message: 'Done', token });
 };
 
-export const changeAdminPassword: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
-	const admin = req.admin as IAdminWithOrg
+export const changeAdminPassword: RequestHandler = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
+	const admin = req.admin as IAdminWithOrg;
 	const { password, newPassword } = req.body;
 	if (!compareSync(password, admin.password)) {
 		return next(new ResponseError('In-valid password', 400));
 	}
 	admin.password = newPassword;
 	admin.lastChangePassword = new Date();
-	if (!await admin.save()) {
-		return new ResponseError(`${ERROR_MESSAGES.serverErr}`)
+	if (!(await admin.save())) {
+		return new ResponseError(`${ERROR_MESSAGES.serverErr}`);
 	}
 	const token = sign(
 		{
 			_id: admin._id!.toString(),
 			email: admin.email,
-			role: 'admin',
+			role: UserRole.ADMIN,
 		},
 		`${process.env.JWT_SIGNATURE}`,
 		{ expiresIn: 60 * 60 * 24 }
 	);
-	return res.status(200).json({ message: 'Password changed successfully!!', token});
-}
+	return res
+		.status(200)
+		.json({ message: 'Password changed successfully!!', token });
+};
+
+export const getAllEmployee: RequestHandler = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
+	const orgId = req.params.orgId;
+	const admin = req.admin as IAdminWithOrg;
+
+	if (admin.organization._id && admin.organization._id.toString() !== orgId) {
+		return next(new ResponseError('In-valid credentials', 400));
+	}
+	const employee = await EmployeeModel.find<EmployeeSchemaType>({
+		organization: orgId,
+	});
+
+	if (!employee) {
+		return next(new ResponseError(`${ERROR_MESSAGES.notFound}`));
+	}
+	return res
+		.status(200)
+		.json({ message: 'All employee in this organization: ', employee });
+};

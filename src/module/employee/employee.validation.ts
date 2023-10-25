@@ -6,8 +6,9 @@ import { AdminSchemaType } from '../../../DB/model/admin.model';
 interface ICreateEmployeeSchema extends IEmployee {}
 
 interface IChangeEmployeePassword extends Pick<IEmployee, 'password'> {
-	password: string
+	password: string;
 	newPassword: string;
+	employeeId: string;
 }
 
 export const createEmployeeSchema = Joi.object<ICreateEmployeeSchema>({
@@ -20,4 +21,5 @@ export const createEmployeeSchema = Joi.object<ICreateEmployeeSchema>({
 export const changePasswordSchema = Joi.object<IChangeEmployeePassword>({
 	password: Joi.string().required(),
 	newPassword: Joi.string().invalid(Joi.ref('password')).required(),
+	employeeId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
 });

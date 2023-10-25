@@ -62,6 +62,7 @@ export function notificationMailTemp({
 				mso-table-rspace: 0pt;
 				mso-table-lspace: 0pt;
 			}
+
 			/**
      * Better fluid images in Internet Explorer.
      */
@@ -133,11 +134,6 @@ export function notificationMailTemp({
 			<!-- start logo -->
 			<tr>
 				<td align="center" bgcolor="#e9ecef">
-					<!--[if (gte mso 9)|(IE)]>
-            <table align="center" border="0" cellpadding="0" cellspacing="0" width="600">
-            <tr>
-            <td align="center" valign="top" width="600">
-            <![endif]-->
 					<table
 						border="0"
 						cellpadding="0"
@@ -165,23 +161,14 @@ export function notificationMailTemp({
 							</td>
 						</tr>
 					</table>
-					<!--[if (gte mso 9)|(IE)]>
-            </td>
-            </tr>
-            </table>
-            <![endif]-->
 				</td>
 			</tr>
+
 			<!-- end logo -->
 
 			<!-- start hero -->
 			<tr>
 				<td align="center" bgcolor="#e9ecef">
-					<!--[if (gte mso 9)|(IE)]>
-            <table align="center" border="0" cellpadding="0" cellspacing="0" width="600">
-            <tr>
-            <td align="center" valign="top" width="600">
-            <![endif]-->
 					<table
 						border="0"
 						cellpadding="0"
@@ -205,16 +192,11 @@ export function notificationMailTemp({
 										letter-spacing: -1px;
 										line-height: 48px;
 									">
-									Taskspace Access Notification
+									Taskscape Access Notification
 								</h1>
 							</td>
 						</tr>
 					</table>
-					<!--[if (gte mso 9)|(IE)]>
-            </td>
-            </tr>
-            </table>
-            <![endif]-->
 				</td>
 			</tr>
 			<!-- end hero -->
@@ -222,11 +204,6 @@ export function notificationMailTemp({
 			<!-- start copy block -->
 			<tr>
 				<td align="center" bgcolor="#e9ecef">
-					<!--[if (gte mso 9)|(IE)]>
-            <table align="center" border="0" cellpadding="0" cellspacing="0" width="600">
-            <tr>
-            <td align="center" valign="top" width="600">
-            <![endif]-->
 					<table
 						border="0"
 						cellpadding="0"
@@ -244,19 +221,27 @@ export function notificationMailTemp({
 									font-size: 16px;
 									line-height: 24px;
 								">
-								<p style="margin: 0">Dear ${employeeName},</p>
+								<p style="margin: 0">
+									Dear <span style="font-weight: bold">${employeeName},</span>
+								</p>
 								<p style="margin: 0">
 									We are excited to inform you that you have been granted access
-									to TASKSPACE application. This is a significant step forward,
+									to TASKSCAPE application. This is a significant step forward,
 									and we welcome you to our community!
 								</p>
 								<p>Here are some important details:</p>
 								<ul>
-									<li>Your username: ${to}</li>
-									<li>Temporary password: ${password}</li>
-									<li>Your role as : ${role}</li>
+									<li>
+										Your username: <span style="color: #14a28f">${to}</span>
+									</li>
+									<li>
+										Temporary password:
+										<span style="color: #14a28f">${password}</span>
+									</li>
+									<li>
+										Your role as : <span style="color: #14a28f">${role}</span>
+									</li>
 								</ul>
-								<p>Please follow the instructions below to get started:</p>
 								<p>Please follow the instructions below to get started:</p>
 								<ol>
 									<li>
@@ -278,17 +263,26 @@ export function notificationMailTemp({
 								<p>
 									If you have any questions or encounter any issues during the
 									process, please do not hesitate to reach out to our support
-									team at [Support Email Address].
+									team at
+									<a href="mailto:taskspace50@gmail.com"
+										>taskspace50@gmail.com</a
+									>
+									.
 								</p>
 								<p>
 									We look forward to having you as a valuable member of our
-									community. Thank you for choosing TASKSPACE!
+									community. Thank you for choosing TASKSCAPE!
 								</p>
 								<p>Sincerely,</p>
 
 								<p>${adminName}</p>
-							
-								<p>Contact Information: taskspace50@gmail.com</p>
+
+								<p>
+									Contact Information:
+									<a href="mailto:taskspace50@gmail.com"
+										>taskspace50@gmail.com</a
+									>
+								</p>
 							</td>
 						</tr>
 						<!-- end copy -->
@@ -328,46 +322,11 @@ export function notificationMailTemp({
 								</table>
 							</td>
 						</tr>
-						<!-- end button -->
-
-						<!-- start copy -->
-						<tr>
-							<td
-								align="left"
-								bgcolor="#ffffff"
-								style="
-									padding: 24px;
-									font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;
-									font-size: 16px;
-									line-height: 24px;
-								">
-								<p style="margin: 0">
-									If that doesn't work, copy and paste the following link in
-									your browser:
-								</p>
-							</td>
-						</tr>
-						<!-- end copy -->
-
-						<!-- start copy -->
-						<!-- <tr>
-                <td align="left" bgcolor="#ffffff" style="padding: 24px; font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif; font-size: 16px; line-height: 24px; border-bottom: 3px solid #d4dadf">
-                <p style="margin: 0;"></p>
-                </td>
-            </tr> -->
-						<!-- end copy -->
 					</table>
-					<!--[if (gte mso 9)|(IE)]>
-            </td>
-            </tr>
-            </table>
-            <![endif]-->
 				</td>
 			</tr>
-			<!-- end copy block -->
 		</table>
-
-		<!-- end body -->
 	</body>
-</html>`;
+</html>
+`;
 }
