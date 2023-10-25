@@ -44,7 +44,13 @@ export const createEmployee: RequestHandler = async (
 			adminName,
 		}),
 	});
-	await newEmployee.save();
+
+	if (!mailInfo.accepted.length) {
+		return next(new ResponseError('Cannot Send Mail Please Try Again', 500))
+	}
+	if (!await newEmployee.save()) {
+		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`, 500))
+	}
 
 	return res
 		.status(200)
@@ -83,14 +89,25 @@ export const employeeChangePassword: RequestHandler = async (
 	res: Response,
 	next: NextFunction
 ) => {
-	const employee: EmployeeSchemaType = req.employee;
+	const employee = req.employee as EmployeeSchemaType
 
 	const { password, newPassword } = req.body;
 	if (!compareSync(password, employee!.password)) {
 		return next(new ResponseError('In-valid password', 400));
 	}
 	employee.password = newPassword;
-	employee!.lastChangePassword = new Date();
-	await employee!.save();
-	return res.status(200).json({ message: 'Password changed successfully!!' });
+	employee.lastChangePassword = new Date();
+	if (!await employee.save()) {
+		return new ResponseError(`${ERROR_MESSAGES.serverErr}`)
+	}
+	const token = sign(
+		{
+			_id: employee._id!.toString(),
+			email: employee.email,
+			role: employee.role,
+		},
+		`${process.env.JWT_SIGNATURE}`,
+		{ expiresIn: 60 * 60 * 24 }
+	);
+	return res.status(200).json({ message: 'Password changed successfully!!', token});
 };
