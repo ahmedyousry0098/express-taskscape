@@ -10,6 +10,7 @@ import { sendMail } from '../../utils/sendMail';
 import { confirmMailTemp } from '../../utils/mail_templates/confirm_mail';
 import { sign } from 'jsonwebtoken';
 import { compareSync } from 'bcryptjs';
+import { UserRole } from '../../constants/user.role';
 
 export const createAdmin: RequestHandler = async (
 	req: Request,
@@ -102,7 +103,7 @@ export const login: RequestHandler = async (
 		{
 			_id: admin._id.toString(),
 			email: admin.email,
-			role: 'admin',
+			role: UserRole.ADMIN,
 		},
 		`${process.env.JWT_SIGNATURE}`,
 		{ expiresIn: 60 * 60 * 24 }
@@ -125,7 +126,7 @@ export const changeAdminPassword: RequestHandler = async (req: Request, res: Res
 		{
 			_id: admin._id!.toString(),
 			email: admin.email,
-			role: 'admin',
+			role: UserRole.ADMIN,
 		},
 		`${process.env.JWT_SIGNATURE}`,
 		{ expiresIn: 60 * 60 * 24 }
