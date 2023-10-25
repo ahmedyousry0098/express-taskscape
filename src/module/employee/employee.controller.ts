@@ -9,6 +9,7 @@ import { sendMail } from '../../utils/sendMail';
 import { notificationMailTemp } from '../../utils/mail_templates/notification_employee_mail';
 import { compareSync } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
+import { AdminSchemaType } from '../../../DB/model/admin.model';
 
 export const createEmployee: RequestHandler = async (
 	req: Request,
@@ -89,8 +90,12 @@ export const employeeChangePassword: RequestHandler = async (
 	res: Response,
 	next: NextFunction
 ) => {
+	const employeeId = req.params.employeeId;
 	const employee = req.employee as EmployeeSchemaType;
 
+	if (employee._id && employee._id.toString() !== employeeId) {
+		return next(new ResponseError('In-valid credentials', 400));
+	}
 	const { password, newPassword } = req.body;
 	if (!compareSync(password, employee!.password)) {
 		return next(new ResponseError('In-valid password', 400));

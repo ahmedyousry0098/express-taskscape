@@ -6,6 +6,7 @@ export interface ITask {
 	startDate: Date;
 	deadline: Date;
 	scrumMaster: typeof Types.ObjectId;
+	project: typeof Types.ObjectId;
 	assignTo: (typeof Types.ObjectId)[];
 	sprint: typeof Types.ObjectId;
 }
