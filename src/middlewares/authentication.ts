@@ -5,6 +5,7 @@ import { ResponseError, asyncHandler } from '../utils/errHandling';
 import { IJwtPayload } from '../interfaces/jwt.interface';
 import { EmployeeModel, EmployeeSchemaType } from '../../DB/model/employee.model';
 import { OrganizationSchemaType } from '../../DB/model/organization.model';
+import { UserRole } from '../constants/user.role';
 
 declare module 'express' {
 	interface Request {
@@ -63,3 +64,19 @@ export const authEmployee: RequestHandler = asyncHandler(async (
 	req.employee = employee;
 	next();
 });
+
+export const isAdminOrScrum = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
+	const { token } = req.headers;
+	if (!token) {
+		return res.status(401).json({ message: 'Please provide a token' });
+	}
+	const decoded = verify(
+		`${token}`,
+		`${process.env.JWT_SIGNATURE}`
+	) as IJwtPayload;
+	return decoded.role == UserRole.ADMIN 
+		? authAdmin(req, res, next)
+		: decoded.role == UserRole.SCRUM_MASTER
+		? authEmployee(req, res, next)
+		: next(new ResponseError('Sorry, You don\'t have permissions'))
+})

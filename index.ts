@@ -7,8 +7,8 @@ import { connectDB } from './DB/connection';
 import { globalErrorHandler } from './src/utils/errHandling';
 import organizationRoutes from './src/module/organization/organization.routes';
 import adminRoutes from './src/module/admin/admin.routes';
-// import employeeRoutes from './src/module/employee/employee.routes';
 import employeeRoutes from './src/module/employee/employee.routes';
+import projectRouter from './src/module/project/project.routes'
 import { config } from 'dotenv';
 import cors from 'cors';
 config({ path: './.env' });
@@ -31,6 +31,7 @@ connectDB();
 app.use('/organization', organizationRoutes);
 app.use('/admin', adminRoutes);
 app.use('/employee', employeeRoutes);
+app.use('/project', projectRouter)
 app.use(globalErrorHandler);
 
 app.all('*', (req: Request, res: Response, next: NextFunction) => {

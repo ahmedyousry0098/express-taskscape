@@ -1,5 +1,5 @@
 export enum UserRole {
-	EMPLOYEE = 'employee',
+	EMPLOYEE = 'member',
 	SCRUM_MASTER = 'scrumMaster',
 	ADMIN = 'admin',
 }
