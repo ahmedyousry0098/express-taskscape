@@ -70,10 +70,10 @@ export const login: RequestHandler = async (
 	const { email, password } = req.body;
 	const admin = await AdminModel.findOne({ email });
 	if (!admin) {
-		return next(new ResponseError('In-valid credentials', 400));
+		return next(new ResponseError('In-valida credentials', 400));
 	}
 	if (!compareSync(password, admin.password)) {
-		return next(new ResponseError('In-valid credentials', 400));
+		return next(new ResponseError('In-validp credentials', 400));
 	}
 	const org = await OrganizationModel.findById<OrganizationSchemaType>(
 		admin.organization
