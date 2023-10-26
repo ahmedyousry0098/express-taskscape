@@ -4,11 +4,7 @@ import { ResponseError } from "../../utils/errHandling";
 import { EmployeeModel, EmployeeSchemaType } from "../../../DB/model/employee.model";
 import { UserRole } from "../../constants/user.role";
 import { ERROR_MESSAGES } from "../../constants/error_messages";
-<<<<<<< HEAD
 import { ProjectModel, ProjectSchemaType } from "../../../DB/model/project.model";
-=======
-import { ProjectModel } from "../../../DB/model/project.model";
->>>>>>> 6f86d7781db8ca7c2336e33bbf23cb7097331142
 
 export const createProject: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     const {organization, scrumMaster, employees} = req.body 

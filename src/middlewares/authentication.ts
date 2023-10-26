@@ -23,12 +23,6 @@ declare module 'express' {
 		};
 	}
 }
-// declare module 'express' {
-// 	interface Request {
-// 		admin?: IAdminWithOrg;
-// 		employee?: EmployeeSchemaType;
-// 	}
-// }
 
 export const authAdmin: RequestHandler = asyncHandler(
 	async (req: Request, res: Response, next: NextFunction) => {
@@ -102,27 +96,6 @@ export const authScrumMaster: RequestHandler = asyncHandler(
 				.json({ message: 'Access denied. User is not a scrumMaster' });
 		}
 	}
-<<<<<<< HEAD
-	req.employee = employee;
-	next();
-});
-
-export const isAdminOrScrum = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-	const { token } = req.headers;
-	if (!token) {
-		return res.status(401).json({ message: 'Please provide a token' });
-	}
-	const decoded = verify(
-		`${token}`,
-		`${process.env.JWT_SIGNATURE}`
-	) as IJwtPayload;
-	return decoded.role == UserRole.ADMIN 
-		? authAdmin(req, res, next)
-		: decoded.role == UserRole.SCRUM_MASTER
-		? authEmployee(req, res, next)
-		: next(new ResponseError('Sorry, You don\'t have permissions'))
-})
-=======
 );
 
 export const isAdminOrScrum = asyncHandler(
@@ -142,4 +115,3 @@ export const isAdminOrScrum = asyncHandler(
 			: next(new ResponseError("Sorry, You don't have permissions"));
 	}
 );
->>>>>>> 6f86d7781db8ca7c2336e33bbf23cb7097331142
