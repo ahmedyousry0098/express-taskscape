@@ -9,13 +9,14 @@ import { sendMail } from '../../utils/sendMail';
 import { notificationMailTemp } from '../../utils/mail_templates/notification_employee_mail';
 import { compareSync } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
+import { AdminModel, AdminSchemaType } from '../../../DB/model/admin.model';
 
 export const createEmployee: RequestHandler = async (
 	req: Request,
 	res: Response,
 	next: NextFunction
 ) => {
-	const admin = req.admin;
+	const admin = await AdminModel.findById<AdminSchemaType>(req.user?._id);
 	const { email, employeeName, password, role } = req.body;
 
 	const employeeIsExist = await EmployeeModel.findOne<EmployeeSchemaType>({
@@ -28,7 +29,7 @@ export const createEmployee: RequestHandler = async (
 	}
 	const newEmployee = new EmployeeModel({
 		...req.body,
-		createdBy: admin?.id,
+		createdBy: admin?._id,
 		organization: admin?.organization,
 	});
 
@@ -46,10 +47,10 @@ export const createEmployee: RequestHandler = async (
 	});
 
 	if (!mailInfo.accepted.length) {
-		return next(new ResponseError('Cannot Send Mail Please Try Again', 500))
+		return next(new ResponseError('Cannot Send Mail Please Try Again', 500));
 	}
-	if (!await newEmployee.save()) {
-		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`, 500))
+	if (!(await newEmployee.save())) {
+		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`, 500));
 	}
 
 	return res
@@ -89,16 +90,24 @@ export const employeeChangePassword: RequestHandler = async (
 	res: Response,
 	next: NextFunction
 ) => {
-	const employee = req.employee as EmployeeSchemaType
-
+	const employeeId = req.params.employeeId;
+	const employee = await EmployeeModel.findById<EmployeeSchemaType>(
+		req.user!._id
+	);
+	if (!employee) {
+		return next(new ResponseError(`${ERROR_MESSAGES.notFound('employee')}`));
+	}
+	if (employee._id && employee._id.toString() !== employeeId) {
+		return next(new ResponseError('In-valid credentials', 400));
+	}
 	const { password, newPassword } = req.body;
-	if (!compareSync(password, employee!.password)) {
+	if (!compareSync(password, employee.password)) {
 		return next(new ResponseError('In-valid password', 400));
 	}
 	employee.password = newPassword;
 	employee.lastChangePassword = new Date();
-	if (!await employee.save()) {
-		return new ResponseError(`${ERROR_MESSAGES.serverErr}`)
+	if (!(await employee.save())) {
+		return new ResponseError(`${ERROR_MESSAGES.serverErr}`);
 	}
 	const token = sign(
 		{
@@ -109,5 +118,25 @@ export const employeeChangePassword: RequestHandler = async (
 		`${process.env.JWT_SIGNATURE}`,
 		{ expiresIn: 60 * 60 * 24 }
 	);
-	return res.status(200).json({ message: 'Password changed successfully!!', token});
+	return res
+		.status(200)
+		.json({ message: 'Password changed successfully!!', token });
+};
+
+export const getAllEmployee: RequestHandler = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
+	const orgId = req.params.orgId;
+	const employee = await EmployeeModel.find<EmployeeSchemaType>({
+		organization: orgId,
+	});
+
+	if (!employee || !employee.length) {
+		return next(new ResponseError(`${ERROR_MESSAGES.notFound('employee')}`));
+	}
+	return res
+		.status(200)
+		.json({ message: 'All employee in this organization: ', employee });
 };

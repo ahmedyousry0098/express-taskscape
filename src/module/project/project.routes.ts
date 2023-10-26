@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { isAdminOrScrum } from "../../middlewares/authentication";
 import { asyncHandler } from "../../utils/errHandling";
-import { addEmployeeToProject, createProject } from "./project.controller";
+import { addEmployeeToProject, createProject, removeEmployeeFromProject } from "./project.controller";
 import { validate } from "../../middlewares/validate";
 import { addEmpoyeesToProjectSchema, createProjectSchema, removeEmpoyeesFromProjectSchema } from "./project.validation";
 
@@ -25,7 +25,7 @@ router.patch(
     '/del-employee',
     validate(removeEmpoyeesFromProjectSchema),
     isAdminOrScrum,
-    asyncHandler
+    asyncHandler(removeEmployeeFromProject)
 )
 
 export default router
