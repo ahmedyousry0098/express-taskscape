@@ -2,7 +2,17 @@ import Joi, { date } from "joi";
 import { IProject } from "../../types/project.types";
 import { CUSTOM_FIELDS_SCHEMAS } from "../../constants/schema_validation_fields";
 
-export interface ICreateProjectSchema extends IProject {}
+interface ICreateProjectSchema extends IProject {}
+interface IEmpoyeesToProjectSchema {
+    organization: string;
+    project: string;
+}
+interface IAddEmpoyeesToProjectSchema extends IEmpoyeesToProjectSchema {
+    employees: string[];
+}
+interface IRemoveEmpoyeesFromProjectSchema extends IEmpoyeesToProjectSchema {
+    employee: string;
+}
 
 export const createProjectSchema = Joi.object<ICreateProjectSchema>({
     projectName: Joi.string().required(),
@@ -12,4 +22,16 @@ export const createProjectSchema = Joi.object<ICreateProjectSchema>({
     organization: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
     scrumMaster: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
     employees: Joi.array().items(CUSTOM_FIELDS_SCHEMAS.objectId).required()
+}).required()
+
+export const addEmpoyeesToProjectSchema = Joi.object<IAddEmpoyeesToProjectSchema>({
+    organization: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
+    employees: Joi.array().items(CUSTOM_FIELDS_SCHEMAS.objectId.required()).required(),
+    project: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
+}).required()
+
+export const removeEmpoyeesFromProjectSchema = Joi.object<IRemoveEmpoyeesFromProjectSchema>({
+    organization: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
+    employee: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
+    project: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
 }).required()
