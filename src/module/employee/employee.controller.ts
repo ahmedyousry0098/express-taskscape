@@ -78,6 +78,7 @@ export const employeeLogin: RequestHandler = async (
 			_id: employee._id?.toString(),
 			email: employee.email,
 			role: employee.role,
+			orgId: employee.organization.toString()
 		},
 		`${process.env.JWT_SIGNATURE}`,
 		{ expiresIn: 60 * 60 * 24 }
@@ -114,6 +115,7 @@ export const employeeChangePassword: RequestHandler = async (
 			_id: employee._id!.toString(),
 			email: employee.email,
 			role: employee.role,
+			orgId: employee.organization.toString()
 		},
 		`${process.env.JWT_SIGNATURE}`,
 		{ expiresIn: 60 * 60 * 24 }
