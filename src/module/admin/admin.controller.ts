@@ -15,10 +15,6 @@ import { confirmMailTemp } from '../../utils/mail_templates/confirm_mail';
 import { sign } from 'jsonwebtoken';
 import { compareSync } from 'bcryptjs';
 import { UserRole } from '../../constants/user.role';
-import {
-	EmployeeModel,
-	EmployeeSchemaType,
-} from '../../../DB/model/employee.model';
 
 export const createAdmin: RequestHandler = async (
 	req: Request,
@@ -70,10 +66,10 @@ export const login: RequestHandler = async (
 	const { email, password } = req.body;
 	const admin = await AdminModel.findOne({ email });
 	if (!admin) {
-		return next(new ResponseError('In-valid credentials', 400));
+		return next(new ResponseError('In-valida credentials', 400));
 	}
 	if (!compareSync(password, admin.password)) {
-		return next(new ResponseError('In-valid credentials', 400));
+		return next(new ResponseError('In-validp credentials', 400));
 	}
 	const org = await OrganizationModel.findById<OrganizationSchemaType>(
 		admin.organization
@@ -124,9 +120,12 @@ export const changeAdminPassword: RequestHandler = async (
 	res: Response,
 	next: NextFunction
 ) => {
-	const admin = req.admin as IAdminWithOrg;
+	const admin = await AdminModel.findById<AdminSchemaType>(req.user!._id);
+	if (!admin) {
+		return next(new ResponseError(`${ERROR_MESSAGES.notFound('admin')}`));
+	}
 	const { password, newPassword } = req.body;
-	if (!compareSync(password, admin.password)) {
+	if (!compareSync(password, admin!.password)) {
 		return next(new ResponseError('In-valid password', 400));
 	}
 	admin.password = newPassword;
@@ -146,27 +145,4 @@ export const changeAdminPassword: RequestHandler = async (
 	return res
 		.status(200)
 		.json({ message: 'Password changed successfully!!', token });
-};
-
-export const getAllEmployee: RequestHandler = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-) => {
-	const orgId = req.params.orgId;
-	const admin = req.admin as IAdminWithOrg;
-
-	if (admin.organization._id && admin.organization._id.toString() !== orgId) {
-		return next(new ResponseError('In-valid credentials', 400));
-	}
-	const employee = await EmployeeModel.find<EmployeeSchemaType>({
-		organization: orgId,
-	});
-
-	if (!employee) {
-		return next(new ResponseError(`${ERROR_MESSAGES.notFound}`));
-	}
-	return res
-		.status(200)
-		.json({ message: 'All employee in this organization: ', employee });
 };
