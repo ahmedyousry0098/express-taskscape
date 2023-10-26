@@ -124,9 +124,12 @@ export const changeAdminPassword: RequestHandler = async (
 	res: Response,
 	next: NextFunction
 ) => {
-	const admin = req.admin as IAdminWithOrg;
+	const admin = await AdminModel.findById<AdminSchemaType>(req.user!._id);
+	if (!admin) {
+		return next(new ResponseError(`${ERROR_MESSAGES.notFound('admin')}`));
+	}
 	const { password, newPassword } = req.body;
-	if (!compareSync(password, admin.password)) {
+	if (!compareSync(password, admin!.password)) {
 		return next(new ResponseError('In-valid password', 400));
 	}
 	admin.password = newPassword;
@@ -146,27 +149,4 @@ export const changeAdminPassword: RequestHandler = async (
 	return res
 		.status(200)
 		.json({ message: 'Password changed successfully!!', token });
-};
-
-export const getAllEmployee: RequestHandler = async (
-	req: Request,
-	res: Response,
-	next: NextFunction
-) => {
-	const orgId = req.params.orgId;
-	const admin = req.admin as IAdminWithOrg;
-
-	if (admin.organization._id && admin.organization._id.toString() !== orgId) {
-		return next(new ResponseError('In-valid credentials', 400));
-	}
-	const employee = await EmployeeModel.find<EmployeeSchemaType>({
-		organization: orgId,
-	});
-
-	if (!employee) {
-		return next(new ResponseError(`${ERROR_MESSAGES.notFound}`));
-	}
-	return res
-		.status(200)
-		.json({ message: 'All employee in this organization: ', employee });
 };

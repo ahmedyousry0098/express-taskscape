@@ -1,10 +1,5 @@
 import { Router } from 'express';
-import {
-	changeAdminPassword,
-	createAdmin,
-	getAllEmployee,
-	login,
-} from './admin.controller';
+import { changeAdminPassword, createAdmin, login } from './admin.controller';
 import { asyncHandler } from '../../utils/errHandling';
 import { validate } from '../../middlewares/validate';
 import { registerAdminSchema, loginAdminSchema } from './admin.validation';
@@ -26,12 +21,6 @@ router.patch(
 	validate(changePasswordSchema),
 	authAdmin,
 	asyncHandler(changeAdminPassword)
-);
-router.get(
-	'/getAllEmployee/:orgId',
-	validate(getOrgByIdSchema),
-	authAdmin,
-	asyncHandler(getAllEmployee)
 );
 
 export default router;

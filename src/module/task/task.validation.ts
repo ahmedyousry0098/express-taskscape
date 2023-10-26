@@ -14,6 +14,6 @@ export const createTaskSchema = Joi.object<ICreateTaskSchema>({
 	scrumMaster: CUSTOM_FIELDS_SCHEMAS.objectId,
 	project: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
 	sprint: CUSTOM_FIELDS_SCHEMAS.objectId,
-	assignTo: Joi.array().items(CUSTOM_FIELDS_SCHEMAS.objectId).required(),
+	assignTo: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
 	scrumId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
 }).required();

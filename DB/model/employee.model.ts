@@ -1,6 +1,7 @@
 import mongoose, { InferSchemaType, Schema, Types, model } from 'mongoose';
 import { IEmployee } from '../../src/types/employee.types';
 import { genSalt, hash } from 'bcryptjs';
+import { UserRole } from '../../src/constants/user.role';
 
 export type EmployeeSchemaType = InferSchemaType<typeof employeeSchema>;
 
@@ -15,8 +16,8 @@ const employeeSchema = new Schema<IEmployeeDocument>(
 		password: { type: String, required: true },
 		role: {
 			type: String,
-			enum: ['scrumMaster', 'member'],
-			default: 'member',
+			enum: UserRole,
+			default: UserRole.EMPLOYEE,
 		},
 		lastChangePassword: { type: Date },
 

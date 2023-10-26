@@ -34,12 +34,11 @@ const taskSchema = new Schema<ITaskDocument>(
 			ref: 'Project',
 			required: true,
 		},
-		assignTo: [
-			{
-				type: Types.ObjectId,
-				ref: 'Employees',
-			},
-		],
+		assignTo: {
+			type: Types.ObjectId,
+			ref: 'Employees',
+		},
+
 		sprint: {
 			type: Types.ObjectId,
 			ref: 'Sprint',

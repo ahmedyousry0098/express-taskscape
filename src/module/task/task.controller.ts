@@ -19,8 +19,9 @@ export const createTask: RequestHandler = async (
 	next: NextFunction
 ) => {
 	const scrumId = req.params.scrumId;
-	const scrumMaster = req.employee as EmployeeSchemaType;
-	if (scrumMaster._id && scrumMaster._id.toString() !== scrumId) {
+	const scrumMaster = req.user;
+
+	if (scrumMaster?._id && scrumMaster?._id.toString() !== scrumId) {
 		return next(new ResponseError('In-valid credintals', 400));
 	}
 
@@ -35,34 +36,20 @@ export const createTask: RequestHandler = async (
 		emp.toString()
 	);
 
-	const missingAssignments = assignTo.filter(
-		(id: string) => !projectEmployees.includes(id)
-	);
-
-	if (missingAssignments.length > 0) {
-		const missingAssignToIds = missingAssignments.join(',');
+	if (!projectEmployees.includes(assignTo)) {
 		return next(
-			new ResponseError(
-				`${missingAssignToIds} ids are not assigned to this project`
-			)
+			new ResponseError('This member is not assigned to this project')
 		);
 	}
 
 	const assignToEmployee = await EmployeeModel.find<EmployeeSchemaType>({
-		_id: { $in: assignTo },
+		_id: assignTo,
 		role: UserRole.EMPLOYEE,
 	});
 	if (!assignToEmployee) {
 		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`));
 	}
 
-	if (assignToEmployee.length < assignTo.length) {
-		const assignToIds = assignToEmployee.map((emp) => emp._id!.toString());
-		const missingAssiningTo: string[] = assignTo
-			.filter((id: string) => !assignToIds.includes(id))
-			.join(',');
-		return next(new ResponseError(`${missingAssiningTo} ids are not exist`));
-	}
 	const task = new TaskModel({
 		...req.body,
 		scrumMaster: scrumId,
