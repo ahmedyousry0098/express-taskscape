@@ -1,5 +1,6 @@
 import mongoose, { InferSchemaType, Schema, Types } from 'mongoose';
 import { ITask } from '../../src/types/task.types';
+import { Stauts } from '../../src/constants/status';
 
 export type TaskSchemaType = InferSchemaType<typeof taskSchema>;
 
@@ -23,6 +24,11 @@ const taskSchema = new Schema<ITaskDocument>(
 		},
 		deadline: {
 			type: Date,
+		},
+		status: {
+			type: String,
+			enum: Stauts,
+			default: Stauts.TODO,
 		},
 		scrumMaster: {
 			type: Types.ObjectId,

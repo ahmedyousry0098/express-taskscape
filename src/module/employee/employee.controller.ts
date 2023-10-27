@@ -142,3 +142,23 @@ export const getAllEmployee: RequestHandler = async (
 		.status(200)
 		.json({ message: 'All employee in this organization: ', employee });
 };
+export const getAllEmployeeForScrum: RequestHandler = async (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
+	const scrumId = req.params.scrumId;
+	const scrumMaster = await EmployeeModel.findById<EmployeeSchemaType>(scrumId);
+
+	const organization = scrumMaster?.organization;
+	const employee = await EmployeeModel.find<EmployeeSchemaType>({
+		organization,
+	});
+
+	if (!employee || !employee.length) {
+		return next(new ResponseError(`${ERROR_MESSAGES.notFound('employee')}`));
+	}
+	return res
+		.status(200)
+		.json({ message: 'All employee in this organization: ', employee });
+};

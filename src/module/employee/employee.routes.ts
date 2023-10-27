@@ -3,6 +3,7 @@ import { validate } from '../../middlewares/validate';
 import {
 	changePasswordSchema,
 	createEmployeeSchema,
+	getAllEmployeeForScrumSchema,
 } from './employee.validation';
 import { asyncHandler } from '../../utils/errHandling';
 import {
@@ -10,8 +11,13 @@ import {
 	employeeChangePassword,
 	employeeLogin,
 	getAllEmployee,
+	getAllEmployeeForScrum,
 } from './employee.controller';
-import { authAdmin, authEmployee } from '../../middlewares/authentication';
+import {
+	authAdmin,
+	authEmployee,
+	authScrumMaster,
+} from '../../middlewares/authentication';
 import { loginAdminSchema } from '../admin/admin.validation';
 import { getOrgByIdSchema } from '../organization/organization.validation';
 
@@ -37,6 +43,13 @@ router.get(
 	validate(getOrgByIdSchema),
 	authAdmin,
 	asyncHandler(getAllEmployee)
+);
+router.get(
+	'/getAllEmployeeScrum/:scrumId',
+	validate(getAllEmployeeForScrumSchema),
+	authEmployee,
+	authScrumMaster,
+	asyncHandler(getAllEmployeeForScrum)
 );
 
 export default router;
