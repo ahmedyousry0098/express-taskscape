@@ -10,6 +10,7 @@ import { notificationMailTemp } from '../../utils/mail_templates/notification_em
 import { compareSync } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
 import { AdminModel, AdminSchemaType } from '../../../DB/model/admin.model';
+import { UserRole } from '../../constants/user.role';
 
 export const createEmployee: RequestHandler = async (
 	req: Request,
@@ -78,7 +79,7 @@ export const employeeLogin: RequestHandler = async (
 			_id: employee._id?.toString(),
 			email: employee.email,
 			role: employee.role,
-			orgId: employee.organization.toString()
+			orgId: employee.organization.toString(),
 		},
 		`${process.env.JWT_SIGNATURE}`,
 		{ expiresIn: 60 * 60 * 24 }
@@ -115,7 +116,7 @@ export const employeeChangePassword: RequestHandler = async (
 			_id: employee._id!.toString(),
 			email: employee.email,
 			role: employee.role,
-			orgId: employee.organization.toString()
+			orgId: employee.organization.toString(),
 		},
 		`${process.env.JWT_SIGNATURE}`,
 		{ expiresIn: 60 * 60 * 24 }
@@ -153,6 +154,7 @@ export const getAllEmployeeForScrum: RequestHandler = async (
 	const organization = scrumMaster?.organization;
 	const employee = await EmployeeModel.find<EmployeeSchemaType>({
 		organization,
+		role: UserRole.EMPLOYEE,
 	});
 
 	if (!employee || !employee.length) {
