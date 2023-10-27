@@ -148,12 +148,17 @@ export const getAllEmployeeForScrum: RequestHandler = async (
 	res: Response,
 	next: NextFunction
 ) => {
-	const scrumId = req.params.scrumId;
-	const scrumMaster = await EmployeeModel.findById<EmployeeSchemaType>(scrumId);
+	const orgId = req.params.orgId;
+	const scrumMaster = await EmployeeModel.findById<EmployeeSchemaType>(
+		req.user?._id
+	);
 
 	const organization = scrumMaster?.organization;
+	if (!organization || organization.toString() !== orgId) {
+		return next(new ResponseError('You dont authriezed to this organization'));
+	}
 	const employee = await EmployeeModel.find<EmployeeSchemaType>({
-		organization,
+		organization: orgId,
 		role: UserRole.EMPLOYEE,
 	});
 
@@ -162,5 +167,5 @@ export const getAllEmployeeForScrum: RequestHandler = async (
 	}
 	return res
 		.status(200)
-		.json({ message: 'All employee in this organization: ', employee });
+		.json({ message: 'All employee members in this organization: ', employee });
 };
