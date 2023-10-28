@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { isAdminOrScrum } from "../../middlewares/authentication";
+import { authAdmin, isAdminOrScrum } from "../../middlewares/authentication";
 import { asyncHandler } from "../../utils/errHandling";
-import { addEmployeeToProject, createProject, removeEmployeeFromProject } from "./project.controller";
+import { addEmployeeToProject, createProject, getOrgProjects, removeEmployeeFromProject } from "./project.controller";
 import { validate } from "../../middlewares/validate";
-import { addEmpoyeesToProjectSchema, createProjectSchema, removeEmpoyeesFromProjectSchema } from "./project.validation";
+import { addEmpoyeesToProjectSchema, createProjectSchema, getOrgProjectsSchema, removeEmpoyeesFromProjectSchema } from "./project.validation";
 
 const router = Router()
 
@@ -26,6 +26,13 @@ router.patch(
     validate(removeEmpoyeesFromProjectSchema),
     isAdminOrScrum,
     asyncHandler(removeEmployeeFromProject)
+)
+
+router.get(
+    '/org-projects/:orgId',
+    validate(getOrgProjectsSchema),
+    isAdminOrScrum,
+    asyncHandler(getOrgProjects)
 )
 
 export default router

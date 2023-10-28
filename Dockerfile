@@ -1,4 +1,4 @@
-FROM node:18
+FROM node:18 AS development
 
 WORKDIR /app
 
@@ -8,6 +8,8 @@ RUN npm install
 
 COPY . .
 
-RUN npm install -g typescript
+RUN npm run build
 
-CMD [ "ts-node", "index.ts" ]
+EXPOSE 6060
+
+CMD [ "node", "./dist/index.js" ]

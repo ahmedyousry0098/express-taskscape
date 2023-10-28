@@ -24,7 +24,7 @@ const projectSchema = new Schema<IProjectDocument>({
     },
     employees: [{
         type: Types.ObjectId,
-        ref: 'Employees'
+        ref: 'Employee'
     }],
     scrumMaster: {type: Types.ObjectId, ref: 'Employee', required: true}
 }, {
