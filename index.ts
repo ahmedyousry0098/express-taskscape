@@ -10,6 +10,7 @@ import adminRoutes from './src/module/admin/admin.routes';
 import employeeRoutes from './src/module/employee/employee.routes';
 import projectRouter from './src/module/project/project.routes';
 import taskRouter from './src/module/task/task.routes';
+import sprintRouter from './src/module/sprint/sprint.routes'
 import { config } from 'dotenv';
 import cors from 'cors';
 config({ path: './.env' });
@@ -34,6 +35,7 @@ app.use('/admin', adminRoutes);
 app.use('/employee', employeeRoutes);
 app.use('/project', projectRouter);
 app.use('/task', taskRouter);
+app.use('/sprint', sprintRouter)
 app.use(globalErrorHandler);
 
 app.all('*', (req: Request, res: Response, next: NextFunction) => {

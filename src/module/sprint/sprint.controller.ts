@@ -7,17 +7,15 @@ import { ERROR_MESSAGES } from "../../constants/error_messages";
 
 export const createSprint: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     const {projectId} = req.params
-    const {orgId} = req.body
     const project = await ProjectModel.findOne<ProjectSchemaType>
     (
         {
             _id: projectId, 
-            organization: orgId
         }
     ).populate<OrganizationSchemaType>(
         'organization'
     ).orFail(
-        new Error('`Project\'s Organization with ${orgId} id is not exist`')
+        new Error(`Project\'s Organization not exist`)
     )
     if (!project) {
         return next(new ResponseError(
