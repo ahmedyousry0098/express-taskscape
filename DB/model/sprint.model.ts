@@ -1,6 +1,7 @@
-import mongoose, {Schema, Types} from "mongoose";
+import mongoose, {InferSchemaType, Schema, Types} from "mongoose";
 import { ISprint } from "../../src/types/sprint.types";
 
+export type SprintSchemaType = InferSchemaType<typeof sprintSchema>
 interface ISpringDocument extends mongoose.Document<typeof Types.ObjectId>, ISprint {}
 
 const sprintSchema = new Schema<ISpringDocument>({
@@ -29,4 +30,4 @@ const sprintSchema = new Schema<ISpringDocument>({
     timestamps: true
 })
 
-export const SpringModel = mongoose.model<ISpringDocument>('Sprint', sprintSchema)
+export const SprintModel = mongoose.model<ISpringDocument>('Sprint', sprintSchema)

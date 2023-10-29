@@ -11,42 +11,42 @@ import {
 import { ERROR_MESSAGES } from '../../constants/error_messages';
 import { UserRole } from '../../constants/user.role';
 import { TaskModel, TaskSchemaType } from '../../../DB/model/task.model';
+import { SprintModel, SprintSchemaType } from '../../../DB/model/sprint.model';
 
 export const createTask: RequestHandler = async (
 	req: Request,
 	res: Response,
 	next: NextFunction
 ) => {
-	const scrumId = req.params.scrumId;
-	const scrumMaster = req.user;
+	const {sprintId} = req.params;
+	const scrumId = req.user!._id;
+	const { assignTo, project: projectId } = req.body;
 
-	if (scrumMaster?._id && scrumMaster?._id.toString() !== scrumId) {
-		return next(new ResponseError('In-valid credintals', 400));
+	const project = await ProjectModel.findById<ProjectSchemaType>(projectId)
+	if(!project) {
+		return next(new ResponseError('Project is not exist', 400))
 	}
-
-	const { project, assignTo } = req.body;
-	const projectIsExist = await ProjectModel.findById<ProjectSchemaType>({
-		_id: project,
-	});
-	if (!projectIsExist) {
-		return next(new ResponseError(`${ERROR_MESSAGES.notFound}`));
+	const sprint = await SprintModel.findOne<SprintSchemaType>({
+		_id: sprintId,
+		project: projectId
+	})
+	if (!sprint) {
+		return next(new ResponseError(`${ERROR_MESSAGES.notFound('Sprint')}`, 400));
 	}
-	const projectEmployees = projectIsExist.employees.map((emp) =>
-		emp.toString()
-	);
-
-	if (!projectEmployees.includes(assignTo)) {
-		return next(
-			new ResponseError('This member is not assigned to this project')
-		);
-	}
-
 	const assignToEmployee = await EmployeeModel.find<EmployeeSchemaType>({
 		_id: assignTo,
 		role: UserRole.EMPLOYEE,
-	});
+	})
 	if (!assignToEmployee) {
-		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`));
+		return next(new ResponseError(`Assigned To Employee is not exist`, 400));
+	}
+
+	const empIds = project.employees.map((emp) => emp.toString())
+
+	if (!empIds.includes(assignTo)) {
+		return next(
+			new ResponseError('This member is not assigned to this project', 400)
+		);
 	}
 
 	const task = new TaskModel({
@@ -65,22 +65,22 @@ export const updateTask: RequestHandler = async (
 	next: NextFunction
 ) => {
 	const taskId = req.params.taskId;
-	const { taskName, description, deadline, assignTo, status } = req.body;
+	const { taskName, description, deadline, status } = req.body;
 
 	const task = await TaskModel.findById<TaskSchemaType>({
 		_id: taskId,
-	});
+	})
 	if (!task) {
 		return next(new ResponseError(ERROR_MESSAGES.notFound('task')));
 	}
-	if (task.scrumMaster.toString() !== req.user?._id) {
+	if (task.scrumMaster.toString() !== req.user!._id) {
 		return next(
 			new ResponseError('You are not authorized to update this task', 403)
 		);
 	}
 	const project = await ProjectModel.findById<ProjectSchemaType>(task.project);
 
-	if (!project || !project.employees.includes(assignTo)) {
+	if (!project) {
 		return next(
 			new ResponseError(
 				'This project does not more exist or a member is not assigned to this project',
@@ -88,19 +88,32 @@ export const updateTask: RequestHandler = async (
 			)
 		);
 	}
-	const assignToEmployee = await EmployeeModel.findById<EmployeeSchemaType>({
-		_id: assignTo,
-	});
-	if (!assignToEmployee || assignToEmployee.role !== UserRole.EMPLOYEE) {
-		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`));
+
+	if (req.body.assignTo) {
+		const assignToEmployee = await EmployeeModel.findOne<EmployeeSchemaType>({
+			_id: req.body.assignTo,
+			role: UserRole.EMPLOYEE,
+		});
+		if (!assignToEmployee) {
+			return next(new ResponseError('assigned to employee is not exist'));
+		}
+
+		const empIds = project.employees.map((emp) => emp.toString())
+
+		if (!empIds.includes(req.body.assignTo)) {
+			return next(
+				new ResponseError('This member is not assigned to this project', 400)
+			);
+		}
 	}
+
 	const updatedTask = await TaskModel.findByIdAndUpdate<TaskSchemaType>(
 		taskId,
 		req.body,
 		{ new: true }
 	);
 
-	if (!(await updatedTask!.save())) {
+	if (!updatedTask) {
 		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`));
 	}
 	return res
@@ -121,7 +134,7 @@ export const updateStatus: RequestHandler = async (
 	if (!task) {
 		return next(new ResponseError(ERROR_MESSAGES.notFound('task')));
 	}
-	if (task.assignTo.toString() !== req.user?._id) {
+	if (task.assignTo.toString() !== req.user!._id) {
 		return next(
 			new ResponseError('You are not authorized to update this task', 403)
 		);
@@ -131,7 +144,7 @@ export const updateStatus: RequestHandler = async (
 		status,
 		{ new: true }
 	);
-	if (!updateStatus!.save()) {
+	if (!updateStatus) {
 		return next(new ResponseError(ERROR_MESSAGES.serverErr));
 	}
 	return res

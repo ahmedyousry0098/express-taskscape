@@ -48,6 +48,7 @@ const taskSchema = new Schema<ITaskDocument>(
 		sprint: {
 			type: Types.ObjectId,
 			ref: 'Sprint',
+			required: true
 		},
 	},
 	{ timestamps: true }

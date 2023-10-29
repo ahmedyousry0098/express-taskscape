@@ -6,7 +6,7 @@ import { UserRole } from "../../constants/user.role";
 import { ERROR_MESSAGES } from "../../constants/error_messages";
 import { ProjectModel, ProjectSchemaType } from "../../../DB/model/project.model";
 import mongoose from "mongoose";
-import { SpringModel } from "../../../DB/model/sprint.model";
+import { SprintModel } from "../../../DB/model/sprint.model";
 import { TaskModel } from "../../../DB/model/task.model";
 
 export const createProject: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
