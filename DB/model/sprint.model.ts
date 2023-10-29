@@ -30,4 +30,4 @@ const sprintSchema = new Schema<ISpringDocument>({
     timestamps: true
 })
 
-export const SpringModel = mongoose.model<ISpringDocument>('Sprint', sprintSchema)
+export const SprintModel = mongoose.model<ISpringDocument>('Sprint', sprintSchema)

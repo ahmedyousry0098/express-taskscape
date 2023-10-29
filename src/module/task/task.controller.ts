@@ -11,7 +11,7 @@ import {
 import { ERROR_MESSAGES } from '../../constants/error_messages';
 import { UserRole } from '../../constants/user.role';
 import { TaskModel, TaskSchemaType } from '../../../DB/model/task.model';
-import { SpringModel, SprintSchemaType } from '../../../DB/model/sprint.model';
+import { SprintModel, SprintSchemaType } from '../../../DB/model/sprint.model';
 
 export const createTask: RequestHandler = async (
 	req: Request,
@@ -26,7 +26,7 @@ export const createTask: RequestHandler = async (
 	if(!project) {
 		return next(new ResponseError('Project is not exist', 400))
 	}
-	const sprint = await SpringModel.findOne<SprintSchemaType>({
+	const sprint = await SprintModel.findOne<SprintSchemaType>({
 		_id: sprintId,
 		project: projectId
 	})
