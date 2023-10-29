@@ -4,7 +4,7 @@ import { CUSTOM_FIELDS_SCHEMAS } from '../../constants/schema_validation_fields'
 import { Stauts } from '../../constants/status';
 
 interface ICreateTaskSchema extends ITask {
-	scrumId: string;
+	sprintId: string;
 }
 
 interface IUpdateTaskSchema extends ITask {
@@ -14,13 +14,11 @@ export const createTaskSchema = Joi.object<ICreateTaskSchema>({
 	taskName: Joi.string().required(),
 	description: Joi.string().required(),
 	startDate: Joi.date().greater(Date.now()),
-	deadline: Joi.date().greater(Date.now()),
+	deadline: Joi.date().greater(Joi.ref('startDate')),
 	status: Joi.string().valid(Stauts.TODO),
-	scrumMaster: CUSTOM_FIELDS_SCHEMAS.objectId,
 	project: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
-	sprint: CUSTOM_FIELDS_SCHEMAS.objectId,
+	sprintId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
 	assignTo: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
-	scrumId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
 }).required();
 
 export const updateTaskSchema = Joi.object<IUpdateTaskSchema>({

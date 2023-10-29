@@ -14,7 +14,7 @@ import { createTask, updateStatus, updateTask } from './task.controller';
 
 const router = Router();
 router.post(
-	'/createtask/:scrumId',
+	'/createtask/:sprintId',
 	authEmployee,
 	authScrumMaster,
 	validate(createTaskSchema),
