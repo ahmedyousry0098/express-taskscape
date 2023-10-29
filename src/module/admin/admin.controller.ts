@@ -108,6 +108,7 @@ export const login: RequestHandler = async (
 			_id: admin._id.toString(),
 			email: admin.email,
 			role: UserRole.ADMIN,
+			orgId: admin.organization.toString()
 		},
 		`${process.env.JWT_SIGNATURE}`,
 		{ expiresIn: 60 * 60 * 24 }
@@ -138,6 +139,7 @@ export const changeAdminPassword: RequestHandler = async (
 			_id: admin._id!.toString(),
 			email: admin.email,
 			role: UserRole.ADMIN,
+			orgId: admin.organization.toString()
 		},
 		`${process.env.JWT_SIGNATURE}`,
 		{ expiresIn: 60 * 60 * 24 }

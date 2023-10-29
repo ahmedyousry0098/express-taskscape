@@ -42,9 +42,9 @@ const taskSchema = new Schema<ITaskDocument>(
 		},
 		assignTo: {
 			type: Types.ObjectId,
-			ref: 'Employees',
+			ref: 'Employee',
+			required: true
 		},
-
 		sprint: {
 			type: Types.ObjectId,
 			ref: 'Sprint',

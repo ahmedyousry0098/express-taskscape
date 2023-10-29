@@ -5,6 +5,9 @@ import { EmployeeModel, EmployeeSchemaType } from "../../../DB/model/employee.mo
 import { UserRole } from "../../constants/user.role";
 import { ERROR_MESSAGES } from "../../constants/error_messages";
 import { ProjectModel, ProjectSchemaType } from "../../../DB/model/project.model";
+import mongoose from "mongoose";
+import { SpringModel } from "../../../DB/model/sprint.model";
+import { TaskModel } from "../../../DB/model/task.model";
 
 export const createProject: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     const {organization, scrumMaster, employees} = req.body 
@@ -92,9 +95,9 @@ export const removeEmployeeFromProject: RequestHandler = async (req: Request, re
     if (!foundedProject.employees.includes(foundedEmployee._id!)) {
         return next(new ResponseError('Sorry This Employee doesn\'t exist in this project', 400))
     }
-    const updatedProject = await ProjectModel.updateOne(
+    const updatedProject = await ProjectModel.findOneAndUpdate(
         {
-            _id: employee,
+            _id: project,
             organization
         }, 
         {
@@ -102,8 +105,34 @@ export const removeEmployeeFromProject: RequestHandler = async (req: Request, re
         },
         {multi: true, new: true}
     )
-    if (!updatedProject.matchedCount) {
-        return next(`${ERROR_MESSAGES.serverErr}`)
+    if (!updatedProject) {
+        return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
     }
     return res.status(200).json({message: 'done', project: updatedProject})
 }
+
+export const getOrgProjects: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    const {orgId} = req.params
+    const projects = await ProjectModel.find<OrganizationSchemaType>({organization: orgId}).populate([
+        {
+            path: 'scrumMaster',
+            select: '-password -createdBy -organization',
+            
+        },
+        {
+            path: 'employees',
+            select: '-password -createdBy -organization',
+        },
+        {
+            path: 'organization'
+        }
+    ])
+    if (!projects) {
+        return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
+    }
+    if (!projects.length) {
+        return res.status(200).json({message: 'No Projects founded in this organization'})
+    }
+    return res.status(200).json({projects})
+}
+

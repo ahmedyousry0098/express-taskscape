@@ -17,6 +17,7 @@ import {
 	authAdmin,
 	authEmployee,
 	authScrumMaster,
+	isAdminOrScrum,
 } from '../../middlewares/authentication';
 import { loginAdminSchema } from '../admin/admin.validation';
 import { getOrgByIdSchema } from '../organization/organization.validation';
@@ -41,11 +42,11 @@ router.patch(
 router.get(
 	'/getAllEmployee/:orgId',
 	validate(getOrgByIdSchema),
-	authAdmin,
+	isAdminOrScrum,
 	asyncHandler(getAllEmployee)
 );
 router.get(
-	'/getAllEmployeeScrum/:scrumId',
+	'/getAllEmployeeScrum/:orgId',
 	validate(getAllEmployeeForScrumSchema),
 	authEmployee,
 	authScrumMaster,

@@ -13,6 +13,9 @@ interface IAddEmpoyeesToProjectSchema extends IEmpoyeesToProjectSchema {
 interface IRemoveEmpoyeesFromProjectSchema extends IEmpoyeesToProjectSchema {
     employee: string;
 }
+interface IOrgId {
+    orgId: string
+}
 
 export const createProjectSchema = Joi.object<ICreateProjectSchema>({
     projectName: Joi.string().required(),
@@ -34,4 +37,8 @@ export const removeEmpoyeesFromProjectSchema = Joi.object<IRemoveEmpoyeesFromPro
     organization: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
     employee: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
     project: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
+}).required()
+
+export const getOrgProjectsSchema = Joi.object<IOrgId>({
+    orgId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
 }).required()

@@ -10,6 +10,7 @@ import { notificationMailTemp } from '../../utils/mail_templates/notification_em
 import { compareSync } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
 import { AdminModel, AdminSchemaType } from '../../../DB/model/admin.model';
+import { UserRole } from '../../constants/user.role';
 
 export const createEmployee: RequestHandler = async (
 	req: Request,
@@ -78,6 +79,7 @@ export const employeeLogin: RequestHandler = async (
 			_id: employee._id?.toString(),
 			email: employee.email,
 			role: employee.role,
+			orgId: employee.organization.toString(),
 		},
 		`${process.env.JWT_SIGNATURE}`,
 		{ expiresIn: 60 * 60 * 24 }
@@ -114,6 +116,7 @@ export const employeeChangePassword: RequestHandler = async (
 			_id: employee._id!.toString(),
 			email: employee.email,
 			role: employee.role,
+			orgId: employee.organization.toString(),
 		},
 		`${process.env.JWT_SIGNATURE}`,
 		{ expiresIn: 60 * 60 * 24 }
@@ -145,12 +148,18 @@ export const getAllEmployeeForScrum: RequestHandler = async (
 	res: Response,
 	next: NextFunction
 ) => {
-	const scrumId = req.params.scrumId;
-	const scrumMaster = await EmployeeModel.findById<EmployeeSchemaType>(scrumId);
+	const orgId = req.params.orgId;
+	const scrumMaster = await EmployeeModel.findById<EmployeeSchemaType>(
+		req.user?._id
+	);
 
 	const organization = scrumMaster?.organization;
+	if (!organization || organization.toString() !== orgId) {
+		return next(new ResponseError('You dont authriezed to this organization'));
+	}
 	const employee = await EmployeeModel.find<EmployeeSchemaType>({
-		organization,
+		organization: orgId,
+		role: UserRole.EMPLOYEE,
 	});
 
 	if (!employee || !employee.length) {
@@ -158,5 +167,5 @@ export const getAllEmployeeForScrum: RequestHandler = async (
 	}
 	return res
 		.status(200)
-		.json({ message: 'All employee in this organization: ', employee });
+		.json({ message: 'All employee members in this organization: ', employee });
 };

@@ -12,7 +12,7 @@ interface IChangeEmployeePassword extends Pick<IEmployee, 'password'> {
 	employeeId: string;
 }
 interface IOnlyObjectId {
-	scrumId: string;
+	orgId: string;
 }
 
 export const createEmployeeSchema = Joi.object<ICreateEmployeeSchema>({
@@ -29,5 +29,5 @@ export const changePasswordSchema = Joi.object<IChangeEmployeePassword>({
 }).required();
 
 export const getAllEmployeeForScrumSchema = Joi.object<IOnlyObjectId>({
-	scrumId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
+	orgId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
 }).required();
