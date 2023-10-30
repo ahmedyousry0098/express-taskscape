@@ -2,13 +2,14 @@ import mongoose, { InferSchemaType, Schema, Types, model } from 'mongoose';
 import { IEmployee } from '../../src/types/employee.types';
 import { genSalt, hash } from 'bcryptjs';
 import { UserRole } from '../../src/constants/user.role';
+import { IProjectDocument } from './project.model';
 
 export type EmployeeSchemaType = InferSchemaType<typeof employeeSchema>;
 
 export interface IEmployeeDocument
 	extends mongoose.Document<typeof Types.ObjectId>,
 		IEmployee {}
-
+		
 const employeeSchema = new Schema<IEmployeeDocument>(
 	{
 		employeeName: { type: String, required: true },

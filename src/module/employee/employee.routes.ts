@@ -11,7 +11,7 @@ import {
 	employeeChangePassword,
 	employeeLogin,
 	getAllEmployee,
-	getAllEmployeeForScrum,
+	getOrgScrums,
 } from './employee.controller';
 import {
 	authAdmin,
@@ -31,7 +31,11 @@ router.post(
 	asyncHandler(createEmployee)
 );
 
-router.post('/login', validate(loginAdminSchema), asyncHandler(employeeLogin));
+router.post(
+	'/login', 
+	validate(loginAdminSchema), 
+	asyncHandler(employeeLogin)
+);
 
 router.patch(
 	'/changepassword/:employeeId',
@@ -40,17 +44,16 @@ router.patch(
 	asyncHandler(employeeChangePassword)
 );
 router.get(
-	'/getAllEmployee/:orgId',
+	'/getAllEmployees/:orgId',
 	validate(getOrgByIdSchema),
 	isAdminOrScrum,
 	asyncHandler(getAllEmployee)
 );
 router.get(
-	'/getAllEmployeeScrum/:orgId',
+	'/getAllScrums/:orgId',
 	validate(getAllEmployeeForScrumSchema),
-	authEmployee,
-	authScrumMaster,
-	asyncHandler(getAllEmployeeForScrum)
+	authAdmin,
+	asyncHandler(getOrgScrums)
 );
 
 export default router;

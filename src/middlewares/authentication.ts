@@ -20,6 +20,7 @@ declare module 'express' {
 			_id: string;
 			email: string;
 			role: UserRole;
+			organization: string
 		};
 	}
 }
@@ -37,7 +38,7 @@ export const authAdmin: RequestHandler = asyncHandler(
 		) as IJwtPayload;
 		const admin = await AdminModel.findById<AdminSchemaType>(
 			decoded._id
-		).select('id email');
+		).select('id email organization');
 		if (!admin) {
 			return next(new ResponseError('In-valid credentials', 406));
 		}
@@ -48,6 +49,7 @@ export const authAdmin: RequestHandler = asyncHandler(
 			_id: admin._id!.toString(),
 			email: admin.email,
 			role: UserRole.ADMIN,
+			organization: admin.organization.toString()
 		};
 
 		next();
@@ -66,7 +68,7 @@ export const authEmployee: RequestHandler = asyncHandler(
 		) as IJwtPayload;
 		const employee = await EmployeeModel.findById<EmployeeSchemaType>(
 			decoded._id
-		).select('_id email role');
+		).select('_id email role organization');
 		if (!employee) {
 			return next(new ResponseError('In-valid credentials', 406));
 		}
@@ -78,6 +80,7 @@ export const authEmployee: RequestHandler = asyncHandler(
 			_id: employee._id!.toString(),
 			email: employee.email,
 			role: employee.role,
+			organization: employee.organization.toString()
 		};
 
 		next();

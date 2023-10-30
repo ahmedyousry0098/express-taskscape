@@ -8,9 +8,13 @@ import { ProjectModel, ProjectSchemaType } from "../../../DB/model/project.model
 
 export const createProject: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     const {organization, scrumMaster, employees} = req.body 
+    const user = req.user
     const org = await OrganizationModel.findById<OrganizationSchemaType>({_id: organization})
     if (!org || org.isDeleted) {
         return next(new ResponseError('Cannot assign this project to specific organization', 400))
+    }
+    if (organization !== user!.organization) {
+        return next(new ResponseError('Sorry Cannot Access This Organization information Since You don\'t belong To It', 401));
     }
     const scrum = await EmployeeModel.findOne<EmployeeSchemaType>({
         _id: scrumMaster, 
@@ -55,8 +59,12 @@ export const createProject: RequestHandler = async (req: Request, res: Response,
 
 export const addEmployeeToProject: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     const {employees, organization, project} = req.body
+    const user = req!.user
     const org = await OrganizationModel.findById({_id: organization})
     if (!org) return next(new ResponseError(`${ERROR_MESSAGES.notFound('Organization')}`))
+    if (organization !== user!.organization) {
+        return next(new ResponseError('Sorry Cannot Access This Organization information Since You don\'t belong To It', 401));
+    }
     const FoundedProject = await ProjectModel.findOne<ProjectSchemaType>({_id: project, organization})
     if (!FoundedProject) {
         return next(new ResponseError('Sorry This Project doesn\'t exist in this organization', 400))
@@ -96,8 +104,12 @@ export const addEmployeeToProject: RequestHandler = async (req: Request, res: Re
 
 export const removeEmployeeFromProject: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     const {employee, organization, project} = req.body
+    const user = req.user
     const org = await OrganizationModel.findById({_id: organization})
     if (!org) return next(new ResponseError(`${ERROR_MESSAGES.notFound('Organization')}`, 400))
+    if (organization !== user!.organization) {
+        return next(new ResponseError('Sorry Cannot Access This Organization information Since You don\'t belong To It', 401));
+    }
     const foundedEmployee = await EmployeeModel.findOne<EmployeeSchemaType>(
         {
             _id: employee,
@@ -142,6 +154,10 @@ export const removeEmployeeFromProject: RequestHandler = async (req: Request, re
 
 export const getOrgProjects: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     const {orgId} = req.params
+    const user = req.user
+    if (orgId !== user!.organization) {
+        return next(new ResponseError('Sorry Cannot Access This Organization information Since You don\'t belong To It', 401));
+    }
     const projects = await ProjectModel.find<OrganizationSchemaType>({organization: orgId}).populate([
         {
             path: 'scrumMaster',

@@ -11,6 +11,7 @@ import { compareSync } from 'bcryptjs';
 import { sign } from 'jsonwebtoken';
 import { AdminModel, AdminSchemaType } from '../../../DB/model/admin.model';
 import { UserRole } from '../../constants/user.role';
+import { ProjectModel } from '../../../DB/model/project.model';
 
 export const createEmployee: RequestHandler = async (
 	req: Request,
@@ -48,15 +49,16 @@ export const createEmployee: RequestHandler = async (
 	});
 
 	if (!mailInfo.accepted.length) {
-		return next(new ResponseError('Cannot Send Mail Please Try Again', 500));
+		return next(new ResponseError('Cannot Send Verification Mail Please Try Again', 500));
 	}
-	if (!(await newEmployee.save())) {
+	const savedEmployee = await newEmployee.save()
+	if (!savedEmployee) {
 		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`, 500));
 	}
 
 	return res
 		.status(200)
-		.json({ message: 'Employee added successfully!!', newEmployee });
+		.json({ message: 'Employee added successfully!!', employee: {...savedEmployee.toJSON(), projects: []} });
 };
 
 export const employeeLogin: RequestHandler = async (
@@ -65,7 +67,7 @@ export const employeeLogin: RequestHandler = async (
 	next: NextFunction
 ) => {
 	const { email, password } = req.body;
-	const employee = await EmployeeModel.findOne<EmployeeSchemaType>({ email });
+	const employee = await EmployeeModel.findOne<EmployeeSchemaType>({ email }).select('-password')
 
 	if (!employee) {
 		return next(new ResponseError('In-valid credentials', 400));
@@ -84,7 +86,7 @@ export const employeeLogin: RequestHandler = async (
 		`${process.env.JWT_SIGNATURE}`,
 		{ expiresIn: 60 * 60 * 24 }
 	);
-	return res.status(200).json({ message: 'Done', token });
+	return res.status(200).json({ message: 'Logged In Successfully', token, employee });
 };
 
 export const employeeChangePassword: RequestHandler = async (
@@ -132,40 +134,53 @@ export const getAllEmployee: RequestHandler = async (
 	next: NextFunction
 ) => {
 	const orgId = req.params.orgId;
-	const employee = await EmployeeModel.find<EmployeeSchemaType>({
+	const user = req.user
+	if (user!.organization !== orgId) {
+		return next(new ResponseError('Sorry Cannot Access This Organization information Since You don\'t belong To It', 401));
+	}
+	const cursor =  EmployeeModel.find<EmployeeSchemaType>({
 		organization: orgId,
-	});
+		role: UserRole.EMPLOYEE
+	}).select('-password').cursor()
 
-	if (!employee || !employee.length) {
-		return next(new ResponseError(`${ERROR_MESSAGES.notFound('employee')}`));
+	let employees = []
+	for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
+		const projects = await ProjectModel.find({employees: {$in: doc._id}}).select('description projectName')
+		employees.push({...doc.toJSON(), projects})
+	}
+	if (!employees.length) {
+		return res.status(200).json({message: 'No employees founded in this orgaization'})
 	}
 	return res
 		.status(200)
-		.json({ message: 'All employee in this organization: ', employee });
+		.json({ message: 'All employee in this organization: ', employees });
 };
-export const getAllEmployeeForScrum: RequestHandler = async (
+
+export const getOrgScrums: RequestHandler = async (
 	req: Request,
 	res: Response,
 	next: NextFunction
 ) => {
-	const orgId = req.params.orgId;
-	const scrumMaster = await EmployeeModel.findById<EmployeeSchemaType>(
-		req.user?._id
-	);
+	const orgId = req.params.orgId
+	const user = req.user
 
-	const organization = scrumMaster?.organization;
-	if (!organization || organization.toString() !== orgId) {
-		return next(new ResponseError('You dont authriezed to this organization'));
+	if (user!.organization !== orgId) {
+		return next(new ResponseError('Sorry Cannot Access This Organization information Since You don\'t belong To It', 401));
 	}
-	const employee = await EmployeeModel.find<EmployeeSchemaType>({
+	const cursor = EmployeeModel.find<EmployeeSchemaType>({
 		organization: orgId,
-		role: UserRole.EMPLOYEE,
-	});
+		role: UserRole.SCRUM_MASTER,
+	}).select('-password').cursor()
 
-	if (!employee || !employee.length) {
-		return next(new ResponseError(`${ERROR_MESSAGES.notFound('employee')}`));
+	let scrums = []
+	for (let doc = await cursor.next(); doc != null; doc = await cursor.next()) {
+		const projects = await ProjectModel.find({employees: {$in: doc._id}}).select('description projectName')
+		scrums.push({...doc.toJSON(), projects})
+	}
+	if (!scrums.length) {
+		return res.status(200).json({message: 'No employees founded in this orgaization'})
 	}
 	return res
 		.status(200)
-		.json({ message: 'All employee members in this organization: ', employee });
+		.json({ message: 'All employee members in this organization: ', scrums });
 };

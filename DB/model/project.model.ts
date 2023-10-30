@@ -3,7 +3,7 @@ import { IProject } from '../../src/types/project.types'
 
 export type ProjectSchemaType = InferSchemaType<typeof projectSchema>
 
-interface IProjectDocument extends mongoose.Document<typeof Types.ObjectId>, IProject {}
+export interface IProjectDocument extends mongoose.Document<typeof Types.ObjectId>, IProject {}
 const projectSchema = new Schema<IProjectDocument>({
     projectName: {
         type: String,

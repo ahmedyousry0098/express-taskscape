@@ -47,12 +47,16 @@ export const getOrganizationById: RequestHandler = async (
 	next: NextFunction
 ) => {
 	const { orgId } = req.params;
+	const user = req.user
 	const org = await OrganizationModel.findById<OrganizationSchemaType>(orgId);
 	if (!org || org.isDeleted) {
 		return next(
 			new ResponseError(ERROR_MESSAGES.notFound('organization'), 404)
 		);
 	}
+	if (orgId !== user!.organization) {
+        return next(new ResponseError('Sorry Cannot Access This Organization information Since You don\'t belong To It', 401));
+    }
 	if (!org.isVerified) {
 		return next(
 			new ResponseError('Please Check your mail and verify Organization first')
@@ -103,20 +107,18 @@ export const updateOrganization: RequestHandler = async (
 	next: NextFunction
 ) => {
 	const { orgId } = req.params;
+	const user = req.user
 	const org = await OrganizationModel.findById<OrganizationSchemaType>(orgId);
 	if (!org) {
 		return next(
 			new ResponseError(`${ERROR_MESSAGES.notFound('Organization')}`)
 		);
 	}
-	const admin = await AdminModel.findById<AdminSchemaType>(req.user!._id);
-	if (org._id?.toString() !== admin?.organization.toString()) {
-		return next(
-			new ResponseError(
-				`Sorry, You not organization admin and havn't permissions to modify organization`
-			)
-		);
-	}
+	if (orgId !== user!.organization) {
+        return next(new ResponseError(
+			`Sorry, You not organization admin and havn't permissions to modify organization`, 401
+		));
+    }
 	if (req.file) {
 		const { public_id, secure_url } = await cloudinary.uploader.upload(
 			req.file.path,

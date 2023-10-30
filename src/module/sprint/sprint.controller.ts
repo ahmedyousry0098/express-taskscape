@@ -51,7 +51,7 @@ export const getProjectSprints: RequestHandler = async (req, res, next) => {
                 select: '-password -organization -lastChangePassword'
             }
         ])
-        sprints.push({...doc, tasks})
+        sprints.push({...doc.toJSON(), tasks})
     }
     return res.status(200).json({message: 'all project sprints', sprints})
 }
