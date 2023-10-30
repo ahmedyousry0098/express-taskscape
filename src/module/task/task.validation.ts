@@ -34,3 +34,7 @@ export const updateStatusSchema = Joi.object<IUpdateTaskSchema>({
 	status: Joi.string().valid(Stauts.TODO, Stauts.DOING, Stauts.DONE),
 	taskId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
 }).required();
+
+export const getEmployeeTasksSchema = Joi.object({
+	empId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
+}).required()

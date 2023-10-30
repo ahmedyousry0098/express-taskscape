@@ -118,3 +118,47 @@ export const isAdminOrScrum = asyncHandler(
 			: next(new ResponseError("Sorry, You don't have permissions"));
 	}
 );
+
+export const systemAuth = asyncHandler(
+	async (req: Request, res: Response, next: NextFunction) => {
+		const { token } = req.headers;
+		if (!token) {
+			return res.status(401).json({ message: 'Please provide a token' });
+		}
+		const decoded = verify(
+			`${token}`,
+			`${process.env.JWT_SIGNATURE}`
+		) as IJwtPayload;
+		const employee = await EmployeeModel.findById<EmployeeSchemaType>(
+			decoded._id
+		).select('_id email role organization');
+		if (employee) {
+			if (new Date(decoded.iat! * 1000) < employee.lastChangePassword) {
+				return next(new ResponseError('Token is invalid', 401));
+			}
+			req.user = {
+				_id: employee._id!.toString(),
+				email: employee.email,
+				role: employee.role,
+				organization: employee.organization.toString()
+			};
+			return next();
+		}
+		const admin = await AdminModel.findById<AdminSchemaType>(
+			decoded._id
+		).select('id email organization');
+		if (admin) {
+			if (new Date(decoded.iat! * 1000) < admin.lastChangePassword) {
+				return next(new ResponseError('Token is invalid', 401));
+			}
+			req.user = {
+				_id: admin._id!.toString(),
+				email: admin.email,
+				role: UserRole.ADMIN,
+				organization: admin.organization.toString()
+			};
+			return next();
+		}
+		return next(new ResponseError('Sorry, You are not authorized', 401))
+	}
+) 

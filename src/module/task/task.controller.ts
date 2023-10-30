@@ -151,3 +151,29 @@ export const updateStatus: RequestHandler = async (
 		.status(200)
 		.json({ message: 'Status updated Successfully...', updateStatus });
 };
+
+export const getEmployeeTasks: RequestHandler = async (req, res, next) => {
+	const {empId} = req.params
+	const employee = await EmployeeModel.findById<EmployeeSchemaType>(empId)
+	if (!employee) {
+		return next(new ResponseError('Employee Is Not Exist', 400))
+	}
+	const tasks = await TaskModel.find<TaskSchemaType>({assignTo: empId}).populate([
+		{
+			path: 'sprint',
+			select: '-project'
+		},
+		{
+			path: 'project',
+			select: '*organization -employees',
+			populate: {
+				path: 'scrumMaster',
+				select: 'employeeName'
+			}
+		}
+	])
+	if (!tasks) {
+		return res.status(200).json({message: 'No tasks Found'})
+	}
+	return res.status(200).json({message: 'employee tasks:', tasks})
+}
