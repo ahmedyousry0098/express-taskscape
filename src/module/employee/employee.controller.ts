@@ -12,6 +12,7 @@ import { sign } from 'jsonwebtoken';
 import { AdminModel, AdminSchemaType } from '../../../DB/model/admin.model';
 import { UserRole } from '../../constants/user.role';
 import { ProjectModel } from '../../../DB/model/project.model';
+import cloudinary from '../../utils/cloudinary';
 
 export const createEmployee: RequestHandler = async (
 	req: Request,
@@ -55,7 +56,6 @@ export const createEmployee: RequestHandler = async (
 	if (!savedEmployee) {
 		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`, 500));
 	}
-
 	return res
 		.status(200)
 		.json({ message: 'Employee added successfully!!', employee: {...savedEmployee.toJSON(), projects: []} });
@@ -185,3 +185,39 @@ export const getOrgScrums: RequestHandler = async (
 		.status(200)
 		.json({ message: 'All employee members in this organization: ', scrums });
 };
+
+export const updateEmployeePhoto: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+	const {employeeId} = req.params
+	const user = req.user
+	const employee = await EmployeeModel.findById<EmployeeSchemaType>(employeeId)
+	if (!employee) {
+		return next(new ResponseError(`${ERROR_MESSAGES.notFound('Employee')}`, 400))
+	}
+	if (employeeId !== user!._id) {
+		return next(new ResponseError('You don\'t have permisson to update other employees profile photos'))
+	}
+	const {public_id, secure_url} = await cloudinary.uploader.upload(
+		req.file!.path,
+		{
+			folder: `${process.env.APP_TITLE}/org`,
+			public_id: `emp_${employee._id?.toString()}`,
+		},
+	)
+	if (!public_id || !secure_url) {
+		return next(new ResponseError(`Cannot update photo, please try again`))
+	}
+
+	const updatedEmp = await EmployeeModel.findByIdAndUpdate(
+		employeeId, {profile_photo: {secure_url,public_id}}, { new: true }
+	).select('-password')
+	if (!updatedEmp) {
+		return new ResponseError(`${ERROR_MESSAGES.serverErr}`)
+	}
+	return res.status(200).json({message: 'profile photo updated successfully', employee: updatedEmp})
+}
+
+export const getMe: RequestHandler = async(req: Request, res: Response, next: NextFunction) => {
+	const user = req.user
+	const employee = await EmployeeModel.findById(user!._id).select('-password')
+	return res.status(200).json({employee})
+}

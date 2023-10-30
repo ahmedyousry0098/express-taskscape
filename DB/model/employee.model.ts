@@ -24,6 +24,10 @@ const employeeSchema = new Schema<IEmployeeDocument>(
 
 		createdBy: { type: Types.ObjectId, ref: 'Admin' },
 		organization: { type: Types.ObjectId, ref: 'Organization' },
+		profile_photo: {
+			public_id: String,
+			secure_url: String
+		},
 	},
 	{ timestamps: true }
 );

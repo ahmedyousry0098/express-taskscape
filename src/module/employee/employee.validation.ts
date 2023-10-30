@@ -3,6 +3,7 @@ import { IEmployee } from '../../types/employee.types';
 import { CUSTOM_FIELDS_SCHEMAS } from '../../constants/schema_validation_fields';
 import { AdminSchemaType } from '../../../DB/model/admin.model';
 import { UserRole } from '../../constants/user.role';
+import { IImageFile } from '../../types/image.types';
 
 interface ICreateEmployeeSchema extends IEmployee {}
 
@@ -31,3 +32,8 @@ export const changePasswordSchema = Joi.object<IChangeEmployeePassword>({
 export const getAllEmployeeForScrumSchema = Joi.object<IOnlyObjectId>({
 	orgId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
 }).required();
+
+export const updateProfilePhotoSchema = Joi.object({
+	file: CUSTOM_FIELDS_SCHEMAS.file.required(),
+	employeeId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
+})

@@ -4,6 +4,7 @@ import {
 	changePasswordSchema,
 	createEmployeeSchema,
 	getAllEmployeeForScrumSchema,
+	updateProfilePhotoSchema,
 } from './employee.validation';
 import { asyncHandler } from '../../utils/errHandling';
 import {
@@ -11,7 +12,9 @@ import {
 	employeeChangePassword,
 	employeeLogin,
 	getAllEmployee,
+	getMe,
 	getOrgScrums,
+	updateEmployeePhoto,
 } from './employee.controller';
 import {
 	authAdmin,
@@ -21,13 +24,15 @@ import {
 } from '../../middlewares/authentication';
 import { loginAdminSchema } from '../admin/admin.validation';
 import { getOrgByIdSchema } from '../organization/organization.validation';
+import { uploadFile } from '../../utils/uploadFile';
+import { filesCategoriesSchema } from '../../constants/file_categories';
 
 const router: Router = Router();
 
 router.post(
 	'/createmployee',
-	authAdmin,
 	validate(createEmployeeSchema),
+	authAdmin,
 	asyncHandler(createEmployee)
 );
 
@@ -55,5 +60,19 @@ router.get(
 	authAdmin,
 	asyncHandler(getOrgScrums)
 );
+
+router.patch(
+	'/update-photo/:employeeId',
+	uploadFile(filesCategoriesSchema.images).single('photo'),
+	validate(updateProfilePhotoSchema),
+	authEmployee,
+	asyncHandler(updateEmployeePhoto)
+)
+
+router.get(
+	'/my-profile',
+	authEmployee,
+	asyncHandler(getMe)
+)
 
 export default router;
