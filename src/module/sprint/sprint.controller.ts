@@ -53,5 +53,5 @@ export const getProjectSprints: RequestHandler = async (req, res, next) => {
         ])
         sprints.push({...doc, tasks})
     }
-    return res.status(200).json({message: 'done', sprints})
+    return res.status(200).json({message: 'all project sprints', sprints})
 }
