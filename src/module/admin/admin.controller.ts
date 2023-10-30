@@ -64,7 +64,7 @@ export const login: RequestHandler = async (
 	next: NextFunction
 ) => {
 	const { email, password } = req.body;
-	const admin = await AdminModel.findOne({ email });
+	const admin = await AdminModel.findOne<AdminSchemaType>({ email });
 	if (!admin) {
 		return next(new ResponseError('In-valida credentials', 400));
 	}
@@ -82,7 +82,7 @@ export const login: RequestHandler = async (
 	if (!org.isVerified) {
 		const token = sign(
 			{
-				_id: admin._id.toString(),
+				_id: admin._id!.toString(),
 				email: admin.email,
 			},
 			`${process.env.JWT_SIGNATURE}`,
@@ -105,7 +105,7 @@ export const login: RequestHandler = async (
 	}
 	const token = sign(
 		{
-			_id: admin._id.toString(),
+			_id: admin._id!.toString(),
 			email: admin.email,
 			role: UserRole.ADMIN,
 			orgId: admin.organization.toString()
@@ -113,7 +113,9 @@ export const login: RequestHandler = async (
 		`${process.env.JWT_SIGNATURE}`,
 		{ expiresIn: 60 * 60 * 24 }
 	);
-	return res.status(200).json({ message: 'Done', token });
+	const adm = admin.toJSON()
+	delete adm.password
+	return res.status(200).json({ message: 'logged In Successfully', token, admin: adm });
 };
 
 export const changeAdminPassword: RequestHandler = async (

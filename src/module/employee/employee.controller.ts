@@ -67,7 +67,7 @@ export const employeeLogin: RequestHandler = async (
 	next: NextFunction
 ) => {
 	const { email, password } = req.body;
-	const employee = await EmployeeModel.findOne<EmployeeSchemaType>({ email }).select('-password')
+	const employee = await EmployeeModel.findOne<EmployeeSchemaType>({ email })
 
 	if (!employee) {
 		return next(new ResponseError('In-valid credentials', 400));
@@ -75,7 +75,6 @@ export const employeeLogin: RequestHandler = async (
 	if (!compareSync(password, employee.password)) {
 		return next(new ResponseError('In-valid password', 400));
 	}
-
 	const token = sign(
 		{
 			_id: employee._id?.toString(),
@@ -86,7 +85,9 @@ export const employeeLogin: RequestHandler = async (
 		`${process.env.JWT_SIGNATURE}`,
 		{ expiresIn: 60 * 60 * 24 }
 	);
-	return res.status(200).json({ message: 'Logged In Successfully', token, employee });
+	const emp = employee.toJSON()
+	delete emp.password
+	return res.status(200).json({ message: 'Logged In Successfully', token, employee: emp });
 };
 
 export const employeeChangePassword: RequestHandler = async (
