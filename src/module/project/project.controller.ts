@@ -5,9 +5,6 @@ import { EmployeeModel, EmployeeSchemaType } from "../../../DB/model/employee.mo
 import { UserRole } from "../../constants/user.role";
 import { ERROR_MESSAGES } from "../../constants/error_messages";
 import { ProjectModel, ProjectSchemaType } from "../../../DB/model/project.model";
-import mongoose from "mongoose";
-import { SprintModel } from "../../../DB/model/sprint.model";
-import { TaskModel } from "../../../DB/model/task.model";
 
 export const createProject: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     const {organization, scrumMaster, employees} = req.body 
@@ -39,10 +36,21 @@ export const createProject: RequestHandler = async (req: Request, res: Response,
     const project = new ProjectModel({
         ...req.body,
     })
-    if (!await project.save()) {
+    const savedProject = await (await project.save()).populate([
+        {
+            path: 'scrumMaster',
+            select: '-password -createdBy -organization',
+            
+        },
+        {
+            path: 'employees',
+            select: '-password -createdBy -organization',
+        }
+    ])
+    if (!savedProject) {
         return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
     }
-    return res.status(201).json({message: 'Done', project})
+    return res.status(201).json({message: 'project added successfully', project})
 }
 
 export const addEmployeeToProject: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
@@ -69,10 +77,21 @@ export const addEmployeeToProject: RequestHandler = async (req: Request, res: Re
         return next(new ResponseError(`Sorry ${missingEmployees} (employees id) are not exist in this organization`, 400))
     }
     FoundedProject.employees.push(...employees)
-    if (!await FoundedProject.save()) {
+    const savedProject = await (await FoundedProject.save()).populate([
+        {
+            path: 'scrumMaster',
+            select: '-password -createdBy -organization',
+            
+        },
+        {
+            path: 'employees',
+            select: '-password -createdBy -organization',
+        }
+    ])
+    if (!savedProject) {
         return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
     }
-    return res.status(200).json({message: 'done', project: FoundedProject})
+    return res.status(200).json({message: 'Employees added to project successfully', project: FoundedProject})
 }
 
 export const removeEmployeeFromProject: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
@@ -103,12 +122,22 @@ export const removeEmployeeFromProject: RequestHandler = async (req: Request, re
         {
             $pull: {employees: employee}
         },
-        {multi: true, new: true}
-    )
+        {new: true}
+    ).populate([
+        {
+            path: 'scrumMaster',
+            select: '-password -createdBy -organization',
+            
+        },
+        {
+            path: 'employees',
+            select: '-password -createdBy -organization',
+        }
+    ])
     if (!updatedProject) {
         return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
     }
-    return res.status(200).json({message: 'done', project: updatedProject})
+    return res.status(200).json({message: 'emploee removed from project successfully', project: updatedProject})
 }
 
 export const getOrgProjects: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
