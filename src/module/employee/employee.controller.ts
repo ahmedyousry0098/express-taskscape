@@ -129,6 +129,26 @@ export const employeeChangePassword: RequestHandler = async (
 		.json({ message: 'Password changed successfully!!', token });
 };
 
+export const changeEmployeeStatus: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+	const {empId} = req.params
+	const user = req.user
+	if (user?._id != empId) {
+		return next(new ResponseError('Cannot Access and Change Other Employee Profile', 401))
+	}
+	const employee = await EmployeeModel.findById<EmployeeSchemaType>(empId)
+	if (!employee) {
+		return next(new ResponseError(`${ERROR_MESSAGES.notFound('Employee')}`, 400))
+	}
+	if (!employee?.isFresh) {
+		return next(new ResponseError(`This Employee Already Not Fresh`, 400))
+	}
+	employee.isFresh = false
+	if (!await employee.save()) {
+		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
+	}
+	return res.status(200).json({message: 'Employee Updated Successfully'})
+}
+
 export const getAllEmployee: RequestHandler = async (
 	req: Request,
 	res: Response,

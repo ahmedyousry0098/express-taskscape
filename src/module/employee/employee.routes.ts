@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { validate } from '../../middlewares/validate';
 import {
+	changeEmpStatusSchema,
 	changePasswordSchema,
 	createEmployeeSchema,
 	getAllEmployeeForScrumSchema,
@@ -8,6 +9,7 @@ import {
 } from './employee.validation';
 import { asyncHandler } from '../../utils/errHandling';
 import {
+	changeEmployeeStatus,
 	createEmployee,
 	employeeChangePassword,
 	employeeLogin,
@@ -48,6 +50,14 @@ router.patch(
 	validate(changePasswordSchema),
 	asyncHandler(employeeChangePassword)
 );
+
+router.patch(
+	'/change-status/:empId',
+	validate(changeEmpStatusSchema),
+	authEmployee,
+	asyncHandler(changeEmployeeStatus)
+)
+
 router.get(
 	'/getAllEmployees/:orgId',
 	validate(getOrgByIdSchema),

@@ -29,6 +29,10 @@ export const changePasswordSchema = Joi.object<IChangeEmployeePassword>({
 	employeeId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
 }).required();
 
+export const changeEmpStatusSchema = Joi.object({
+	empId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
+}).required()
+
 export const getAllEmployeeForScrumSchema = Joi.object<IOnlyObjectId>({
 	orgId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
 }).required();

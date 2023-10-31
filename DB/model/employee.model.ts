@@ -28,6 +28,10 @@ const employeeSchema = new Schema<IEmployeeDocument>(
 			public_id: String,
 			secure_url: String
 		},
+		isFresh: {
+			type: Boolean,
+			default: true
+		}
 	},
 	{ timestamps: true }
 );

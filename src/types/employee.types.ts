@@ -11,7 +11,8 @@ export interface IEmployee {
 	lastChangePassword: Date;
 	createdBy: typeof Types.ObjectId;
 	organization: typeof Types.ObjectId;
-	profile_photo?: IImage
+	profile_photo?: IImage;
+	isFresh: boolean
 }
 
 export interface IEmployeeWithPojects extends IEmployee {
