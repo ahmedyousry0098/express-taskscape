@@ -181,3 +181,38 @@ export const getOrgProjects: RequestHandler = async (req: Request, res: Response
     return res.status(200).json({projects})
 }
 
+export const getEmployeeProjects: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    const {empId} = req.params
+    const employee = await EmployeeModel.findOne<EmployeeSchemaType>({
+        _id: empId,
+        role: UserRole.EMPLOYEE
+    })
+    if (!employee) {
+        return next(new ResponseError(`${ERROR_MESSAGES.notFound('Employee')}`))
+    }
+    const projects = await ProjectModel.find({employees: {$in: empId}}).populate([
+        {
+            path: 'scrumMaster',
+            select: 'employeeName email'
+        }
+    ]).select('-organization -employees')
+    return res.status(200).json({message: 'employee\'s projects', projects})
+}
+
+export const getScrumProjects: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    const {scrumId} = req.params
+    const scrum = await EmployeeModel.findOne<EmployeeSchemaType>({
+        _id: scrumId,
+        role: UserRole.SCRUM_MASTER
+    })
+    if (!scrum) {
+        return next(new ResponseError(`${ERROR_MESSAGES.notFound('Scrum')}`))
+    }
+    const projects = await ProjectModel.find({scrumMaster: {$in: scrumId}}).populate([
+        {
+            path: 'employees',
+            select: 'employeeName email'
+        }
+    ]).select('-organization')
+    return res.status(200).json({message: 'Scrum\'s projects', projects})
+}
