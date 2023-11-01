@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { authAdmin, authEmployee, authScrumMaster, isAdminOrScrum, systemAuth } from "../../middlewares/authentication";
 import { asyncHandler } from "../../utils/errHandling";
-import { addEmployeeToProject, createProject, getEmployeeProjects, getOrgProjects, getScrumProjects, removeEmployeeFromProject } from "./project.controller";
+import { addEmployeeToProject, createProject, getEmployeeProjects, getOrgProjects, getScrumProjects, projectDetails, removeEmployeeFromProject } from "./project.controller";
 import { validate } from "../../middlewares/validate";
-import { addEmpoyeesToProjectSchema, createProjectSchema, getEmpProjectsSchema, getOrgProjectsSchema, getScrumProjectsSchema, removeEmpoyeesFromProjectSchema } from "./project.validation";
+import { addEmpoyeesToProjectSchema, createProjectSchema, getEmpProjectsSchema, getOrgProjectsSchema, getProjectDetailsSchema, getScrumProjectsSchema, removeEmpoyeesFromProjectSchema } from "./project.validation";
 
 const router = Router()
 
@@ -47,6 +47,13 @@ router.get(
     validate(getScrumProjectsSchema),
     isAdminOrScrum,
     asyncHandler(getScrumProjects)
+)
+
+router.get(
+    '/details/:projectId',
+    validate(getProjectDetailsSchema),
+    systemAuth,
+    asyncHandler(projectDetails)
 )
 
 export default router

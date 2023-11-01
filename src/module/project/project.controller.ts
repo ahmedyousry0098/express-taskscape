@@ -5,6 +5,8 @@ import { EmployeeModel, EmployeeSchemaType } from "../../../DB/model/employee.mo
 import { UserRole } from "../../constants/user.role";
 import { ERROR_MESSAGES } from "../../constants/error_messages";
 import { ProjectModel, ProjectSchemaType } from "../../../DB/model/project.model";
+import { SprintModel, SprintSchemaType } from "../../../DB/model/sprint.model";
+import { TaskModel, TaskSchemaType } from "../../../DB/model/task.model";
 
 export const createProject: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     const {organization, scrumMaster, employees} = req.body 
@@ -149,7 +151,7 @@ export const removeEmployeeFromProject: RequestHandler = async (req: Request, re
     if (!updatedProject) {
         return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
     }
-    return res.status(200).json({message: 'emploee removed from project successfully', project: updatedProject})
+    return res.status(200).json({message: 'employee removed from project successfully', project: updatedProject})
 }
 
 export const getOrgProjects: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
@@ -215,4 +217,38 @@ export const getScrumProjects: RequestHandler = async (req: Request, res: Respon
         }
     ]).select('-organization')
     return res.status(200).json({message: 'Scrum\'s projects', projects})
+}
+
+export const projectDetails: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    const {projectId} = req.params
+    const project = await ProjectModel.findById<ProjectSchemaType>(projectId).populate([
+        {
+            path: 'employees',
+            select: 'employeeName email role profile_photo'
+        },
+        {
+            path: 'scrumMaster',
+            select: 'employeeName email role profile_photo'
+        }
+    ])
+    if (!project) {
+        return next(new ResponseError(`${ERROR_MESSAGES.notFound('Project')}`, 400))
+    }
+    const cursor = SprintModel.find<SprintSchemaType>({project: project._id}).cursor()
+
+    let sprints = []
+    for (let sprint = await cursor.next(); sprint != null ; sprint = await cursor.next()) {
+        const tasks = await TaskModel.find<TaskSchemaType>().populate([
+            {
+                path: 'assignTo',
+                select: 'employeeName email role profile_photo'
+            },
+            {
+                path: 'scrumMaster',
+                select: 'employeeName email role profile_photo'
+            }
+        ])
+        sprints.push({...sprint.toJSON(), tasks})
+    }
+    return res.status(200).json({message: `${project.projectName} (project) details`, details: {...project.toJSON(), sprints}})
 }

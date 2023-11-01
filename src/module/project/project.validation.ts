@@ -22,6 +22,9 @@ interface IEmpId {
 interface IScrumId {
     scrumId: string
 }
+interface IProjectId {
+    projectId: string
+}
 
 export const createProjectSchema = Joi.object<ICreateProjectSchema>({
     projectName: Joi.string().required(),
@@ -55,4 +58,8 @@ export const getEmpProjectsSchema = Joi.object<IEmpId>({
 
 export const getScrumProjectsSchema = Joi.object<IScrumId>({
     scrumId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
+}).required()
+
+export const getProjectDetailsSchema = Joi.object<IProjectId>({
+    projectId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
 }).required()
