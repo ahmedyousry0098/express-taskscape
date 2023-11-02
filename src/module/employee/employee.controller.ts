@@ -58,7 +58,7 @@ export const createEmployee: RequestHandler = async (
 	}
 	return res
 		.status(200)
-		.json({ message: 'Employee added successfully!!', employee: {...savedEmployee.toJSON(), projects: []} });
+		.json({ message: 'Employee added successfully!!', employee: {...savedEmployee.toJSON(), password: undefined, projects: []} });
 };
 
 export const employeeLogin: RequestHandler = async (

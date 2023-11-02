@@ -4,6 +4,7 @@ import { CUSTOM_FIELDS_SCHEMAS } from '../../constants/schema_validation_fields'
 import { AdminSchemaType } from '../../../DB/model/admin.model';
 import { UserRole } from '../../constants/user.role';
 import { IImageFile } from '../../types/image.types';
+import { EmploymentType } from '../../constants/employment_type';
 
 interface ICreateEmployeeSchema extends IEmployee {}
 
@@ -21,6 +22,9 @@ export const createEmployeeSchema = Joi.object<ICreateEmployeeSchema>({
 	email: Joi.string().email().required(),
 	password: Joi.string().required(),
 	role: Joi.string().valid(UserRole.EMPLOYEE, UserRole.SCRUM_MASTER).required(),
+	experience: Joi.number().positive().max(50).allow(0).required(),
+	employmentType: Joi.string().valid(...Object.values(EmploymentType)).required(),
+	title: Joi.string().min(2).max(50).required()
 }).required();
 
 export const changePasswordSchema = Joi.object<IChangeEmployeePassword>({

@@ -1,6 +1,6 @@
-FROM node:18 AS development
+FROM node:18.13.0 AS development
 
-WORKDIR /app
+WORKDIR /backapp
 
 COPY package.json .
 
@@ -10,6 +10,8 @@ COPY . .
 
 RUN npm run build
 
+RUN npm i -g nodemon
+
 EXPOSE 6060
 
-CMD [ "node", "./dist/index.js" ]
+# CMD [ "nodemon", "index.ts" ]

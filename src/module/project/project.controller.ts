@@ -195,7 +195,7 @@ export const getEmployeeProjects: RequestHandler = async (req: Request, res: Res
     const projects = await ProjectModel.find({employees: {$in: empId}}).populate([
         {
             path: 'scrumMaster',
-            select: 'employeeName email'
+            select: 'employeeName email experience workingTime'
         }
     ]).select('-organization -employees')
     return res.status(200).json({message: 'employee\'s projects', projects})
@@ -213,7 +213,7 @@ export const getScrumProjects: RequestHandler = async (req: Request, res: Respon
     const projects = await ProjectModel.find({scrumMaster: {$in: scrumId}}).populate([
         {
             path: 'employees',
-            select: 'employeeName email'
+            select: 'employeeName email experience workingTime'
         }
     ]).select('-organization')
     return res.status(200).json({message: 'Scrum\'s projects', projects})
@@ -224,11 +224,11 @@ export const projectDetails: RequestHandler = async (req: Request, res: Response
     const project = await ProjectModel.findById<ProjectSchemaType>(projectId).populate([
         {
             path: 'employees',
-            select: 'employeeName email role profile_photo'
+            select: 'employeeName email role profile_photo experience workingTime'
         },
         {
             path: 'scrumMaster',
-            select: 'employeeName email role profile_photo'
+            select: 'employeeName email role profile_photo experience workingTime'
         }
     ])
     if (!project) {
@@ -241,11 +241,11 @@ export const projectDetails: RequestHandler = async (req: Request, res: Response
         const tasks = await TaskModel.find<TaskSchemaType>().populate([
             {
                 path: 'assignTo',
-                select: 'employeeName email role profile_photo'
+                select: 'employeeName email role profile_photo experience workingTime'
             },
             {
                 path: 'scrumMaster',
-                select: 'employeeName email role profile_photo'
+                select: 'employeeName email role profile_photo experience workingTime'
             }
         ])
         sprints.push({...sprint.toJSON(), tasks})

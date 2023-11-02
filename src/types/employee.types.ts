@@ -2,6 +2,7 @@ import { Types } from 'mongoose';
 import { UserRole } from '../constants/user.role';
 import { IProject } from './project.types';
 import { IImage } from './image.types';
+import { EmploymentType } from '../constants/employment_type';
 
 export interface IEmployee {
 	employeeName: string;
@@ -12,7 +13,10 @@ export interface IEmployee {
 	createdBy: typeof Types.ObjectId;
 	organization: typeof Types.ObjectId;
 	profile_photo?: IImage;
-	isFresh: boolean
+	isFresh: boolean;
+	experience: Number;
+	employmentType: EmploymentType;
+	title: string;
 }
 
 export interface IEmployeeWithPojects extends IEmployee {
