@@ -188,12 +188,18 @@ export const getEmployeeProjects: RequestHandler = async (req: Request, res: Res
     if (!employee) {
         return next(new ResponseError(`${ERROR_MESSAGES.notFound('Employee')}`))
     }
-    const projects = await ProjectModel.find({employees: {$in: empId}}).populate([
+    const projectsCursor = ProjectModel.find({employees: {$in: empId}}).populate([
         {
             path: 'scrumMaster',
             select: 'employeeName email experience workingTime'
         }
-    ]).select('-organization -employees')
+    ]).select('-organization -employees').cursor()
+
+    let projects:any[] = []
+    for (let project = await projectsCursor.next(); project != null; project = await projectsCursor.next()) {
+        const sprints = await SprintModel.find({project})
+        projects.push({...project.toJSON(), sprints})
+    }
     return res.status(200).json({message: 'employee\'s projects', projects})
 }
 
@@ -206,12 +212,18 @@ export const getScrumProjects: RequestHandler = async (req: Request, res: Respon
     if (!scrum) {
         return next(new ResponseError(`${ERROR_MESSAGES.notFound('Scrum')}`))
     }
-    const projects = await ProjectModel.find({scrumMaster: {$in: scrumId}}).populate([
+    const projectsCursor = ProjectModel.find({scrumMaster: {$in: scrumId}}).populate([
         {
             path: 'employees',
             select: 'employeeName email experience workingTime'
         }
-    ]).select('-organization')
+    ]).select('-organization').cursor()
+
+    let projects:any[] = []
+    for (let project = await projectsCursor.next(); project != null; project = await projectsCursor.next()) {
+        const sprints = await SprintModel.find({project})
+        projects.push({...project.toJSON(), sprints})
+    }
     return res.status(200).json({message: 'Scrum\'s projects', projects})
 }
 
