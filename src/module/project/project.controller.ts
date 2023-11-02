@@ -71,37 +71,33 @@ export const addEmployeeToProject: RequestHandler = async (req: Request, res: Re
     if (!FoundedProject) {
         return next(new ResponseError('Sorry This Project doesn\'t exist in this organization', 400))
     }
+    for (let emp of employees) {
+        if (FoundedProject.employees.includes(emp)) {
+            const existsEmployee = await EmployeeModel.findById(emp).select('employeeName')
+            return next(new ResponseError(`${existsEmployee?.employeeName} already exist in this project`, 409))
+        }
+    }
     const foundedEmployees = await EmployeeModel.find<EmployeeSchemaType>(
         {
             _id: {$in: employees},
             organization
         }
     )
-    if (!foundedEmployees) {
-        return next(new ResponseError(`Sorry These Employees doesn\'t exist in this Organization`, 400))
-    }
     if (foundedEmployees.length < employees.length)
     {
         const empIds = foundedEmployees.map(emp => emp._id?.toString())
         const missingEmployees = (employees as string[]).filter((id: string) => !empIds.includes(id)).join(", ")
         return next(new ResponseError(`Sorry ${missingEmployees} (employees id) are not exist in this organization`, 400))
     }
-    FoundedProject.employees.push(...employees)
-    const savedProject = await (await FoundedProject.save()).populate([
-        {
-            path: 'scrumMaster',
-            select: '-password -createdBy -organization',
-            
-        },
-        {
-            path: 'employees',
-            select: '-password -createdBy -organization',
-        }
-    ])
-    if (!savedProject) {
+    const updatedProject = await ProjectModel.findByIdAndUpdate(
+        {_id: project},
+        {$addToSet: {employees: {$each: employees}}},
+        {new: true}
+    )
+    if (!updatedProject) {
         return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
     }
-    return res.status(200).json({message: 'Employees added to project successfully', project: FoundedProject})
+    return res.status(200).json({message: 'Employees added to project successfully', project: updatedProject})
 }
 
 export const removeEmployeeFromProject: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
