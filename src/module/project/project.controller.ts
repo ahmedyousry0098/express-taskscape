@@ -13,7 +13,7 @@ export const createProject: RequestHandler = async (req: Request, res: Response,
     const user = req.user
     const org = await OrganizationModel.findById<OrganizationSchemaType>({_id: organization})
     if (!org || org.isDeleted) {
-        return next(new ResponseError('Cannot assign this project to specific organization', 400))
+        return next(new ResponseError(`${ERROR_MESSAGES.notFound('Organization')}`, 400))
     }
     if (organization !== user!.organization) {
         return next(new ResponseError('Sorry Cannot Access This Organization information Since You don\'t belong To It', 401));
@@ -150,6 +150,28 @@ export const removeEmployeeFromProject: RequestHandler = async (req: Request, re
     return res.status(200).json({message: 'employee removed from project successfully', project: updatedProject})
 }
 
+export const updateProject: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    const {projectId} = req.params
+    const user = req.user
+    const project = await ProjectModel.findById(projectId)
+    if (!project) {
+        return next(new ResponseError(`${ERROR_MESSAGES.notFound('Project')}`))
+    }
+    if (project.organization.toString() !== user!.organization) {
+        return next(
+            new ResponseError('Sorry, You Don\'t Have Permission To This Organization Projects Since You Don\'t It\'s Admin')
+        )
+    }
+    const updatedProject = await ProjectModel.updateOne(
+        {_id: projectId},
+        req.body,
+    )
+    if (!updatedProject.matchedCount) {
+        return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
+    }
+    return res.status(200).json({message: `project (${project.projectName}) updated successfully`})
+}
+
 export const getOrgProjects: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     const {orgId} = req.params
     const user = req.user
@@ -259,4 +281,33 @@ export const projectDetails: RequestHandler = async (req: Request, res: Response
         sprints.push({...sprint.toJSON(), tasks})
     }
     return res.status(200).json({message: `${project.projectName} (project) details`, details: {...project.toJSON(), sprints}})
+}
+
+export const deleteProject: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    const {projectId} = req.params
+    const user = req.user
+    const project = await ProjectModel.findById<ProjectSchemaType>(projectId)
+    if (!project) {
+        return next(new ResponseError(`${ERROR_MESSAGES.notFound('Project')}`, 400))
+    }
+    if (project.organization.toString() !== user!.organization) {
+        return next(
+            new ResponseError('Sorry, You Don\'t Have Permission To This Organization Projects Since You Don\'t It\'s Admin', 401)
+        )
+    }
+    if (!await project.deleteOne()) {
+        return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
+    }
+    const sprints = await SprintModel.find({project: project._id})
+    if (!sprints) {
+        return res.status(200).json({message: 'Project Deleted Successfully'})
+    }
+    const deletedSprints = await SprintModel.deleteMany({project: project._id})
+    if (!deletedSprints.deletedCount) {
+        return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
+    }
+    for (let sprint of sprints) {
+        await TaskModel.deleteMany({sprint, project: project._id})
+    }
+    return res.status(200).json({message: `project (${project.projectName}) deleted successfully`})
 }

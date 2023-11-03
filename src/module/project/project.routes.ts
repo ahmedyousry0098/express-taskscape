@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { authAdmin, authEmployee, authScrumMaster, isAdminOrScrum, systemAuth } from "../../middlewares/authentication";
 import { asyncHandler } from "../../utils/errHandling";
-import { addEmployeeToProject, createProject, getEmployeeProjects, getOrgProjects, getScrumProjects, projectDetails, removeEmployeeFromProject } from "./project.controller";
+import { addEmployeeToProject, createProject, deleteProject, getEmployeeProjects, getOrgProjects, getScrumProjects, projectDetails, removeEmployeeFromProject, updateProject } from "./project.controller";
 import { validate } from "../../middlewares/validate";
-import { addEmpoyeesToProjectSchema, createProjectSchema, getEmpProjectsSchema, getOrgProjectsSchema, getProjectDetailsSchema, getScrumProjectsSchema, removeEmpoyeesFromProjectSchema } from "./project.validation";
+import { addEmpoyeesToProjectSchema, createProjectSchema, deleteProjectSchema, getEmpProjectsSchema, getOrgProjectsSchema, getProjectDetailsSchema, getScrumProjectsSchema, removeEmpoyeesFromProjectSchema, updateProjectSchema } from "./project.validation";
 
 const router = Router()
 
@@ -26,6 +26,13 @@ router.patch(
     validate(removeEmpoyeesFromProjectSchema),
     isAdminOrScrum,
     asyncHandler(removeEmployeeFromProject)
+)
+
+router.put(
+    '/update/:projectId',
+    validate(updateProjectSchema),
+    authAdmin,
+    asyncHandler(updateProject)
 )
 
 router.get(
@@ -54,6 +61,13 @@ router.get(
     validate(getProjectDetailsSchema),
     systemAuth,
     asyncHandler(projectDetails)
+)
+
+router.delete(
+    '/:projectId',
+    validate(deleteProjectSchema),
+    authAdmin,
+    asyncHandler(deleteProject)
 )
 
 export default router

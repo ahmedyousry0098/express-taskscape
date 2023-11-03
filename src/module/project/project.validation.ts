@@ -3,15 +3,21 @@ import { IProject } from "../../types/project.types";
 import { CUSTOM_FIELDS_SCHEMAS } from "../../constants/schema_validation_fields";
 
 interface ICreateProjectSchema extends IProject {}
-interface IEmpoyeesToProjectSchema {
+interface IEmployeesToProjectSchema {
     organization: string;
     project: string;
 }
-interface IAddEmpoyeesToProjectSchema extends IEmpoyeesToProjectSchema {
+interface IAddEmpoyeesToProjectSchema extends IEmployeesToProjectSchema {
     employees: string[];
 }
-interface IRemoveEmpoyeesFromProjectSchema extends IEmpoyeesToProjectSchema {
+interface IRemoveEmpoyeesFromProjectSchema extends IEmployeesToProjectSchema {
     employee: string;
+}
+interface IUpdateProjectSchema {
+    projectName: string;
+    description: string;
+    startDate: Date;
+    deadline: Date
 }
 interface IOrgId {
     orgId: string
@@ -29,8 +35,8 @@ interface IProjectId {
 export const createProjectSchema = Joi.object<ICreateProjectSchema>({
     projectName: Joi.string().required(),
     description: Joi.string(),
-    startDate: Joi.date().greater(Date.now()),
-    deadline: Joi.date().greater(Date.now()),
+    startDate: Joi.date().min(new Date().toLocaleDateString()),
+    deadline: Joi.date().greater(Joi.ref('startDate')),
     organization: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
     scrumMaster: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
     employees: Joi.array().items(CUSTOM_FIELDS_SCHEMAS.objectId).required()
@@ -48,6 +54,13 @@ export const removeEmpoyeesFromProjectSchema = Joi.object<IRemoveEmpoyeesFromPro
     project: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
 }).required()
 
+export const updateProjectSchema = Joi.object<IUpdateProjectSchema>({
+    projectName: Joi.string(),
+    description: Joi.string(),
+    startDate: Joi.date().min(new Date().toLocaleDateString()),
+    deadline: Joi.date().greater(Joi.ref('startDate')),
+}).required()
+
 export const getOrgProjectsSchema = Joi.object<IOrgId>({
     orgId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
 }).required()
@@ -61,5 +74,9 @@ export const getScrumProjectsSchema = Joi.object<IScrumId>({
 }).required()
 
 export const getProjectDetailsSchema = Joi.object<IProjectId>({
+    projectId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
+}).required()
+
+export const deleteProjectSchema = Joi.object<IProjectId>({
     projectId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
 }).required()
