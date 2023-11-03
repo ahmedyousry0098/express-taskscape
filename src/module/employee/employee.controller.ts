@@ -100,14 +100,14 @@ export const employeeChangePassword: RequestHandler = async (
 		req.user!._id
 	);
 	if (!employee) {
-		return next(new ResponseError(`${ERROR_MESSAGES.notFound('employee')}`));
+		return next(new ResponseError(`${ERROR_MESSAGES.notFound('employee')}`, 400));
 	}
 	if (employee._id && employee._id.toString() !== employeeId) {
-		return next(new ResponseError('In-valid credentials', 400));
+		return next(new ResponseError('Sorry, Only Account Owner Have Permission To Change Account Password', 401));
 	}
 	const { password, newPassword } = req.body;
 	if (!compareSync(password, employee.password)) {
-		return next(new ResponseError('In-valid password', 400));
+		return next(new ResponseError('In-valid password', 401));
 	}
 	employee.password = newPassword;
 	employee.lastChangePassword = new Date();
@@ -159,9 +159,9 @@ export const getAllEmployee: RequestHandler = async (
 	if (user!.organization !== orgId) {
 		return next(new ResponseError('Sorry Cannot Access This Organization information Since You don\'t belong To It', 401));
 	}
-	const cursor =  EmployeeModel.find<EmployeeSchemaType>({
+	const cursor = EmployeeModel.find<EmployeeSchemaType>({
 		organization: orgId,
-		role: UserRole.EMPLOYEE
+		role: UserRole.EMPLOYEE,
 	}).select('-password').cursor()
 
 	let employees = []
@@ -240,4 +240,29 @@ export const getMe: RequestHandler = async(req: Request, res: Response, next: Ne
 	const user = req.user
 	const employee = await EmployeeModel.findById(user!._id).select('-password')
 	return res.status(200).json({employee})
+}
+
+export const deleteEmployee: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+	const {empId} = req.params
+	const user = req.user
+	const employee = await EmployeeModel.findOne<EmployeeSchemaType>({
+		_id: empId,
+		role: UserRole.EMPLOYEE
+	})
+	if (!employee) {
+		return next(new ResponseError(`${ERROR_MESSAGES.notFound('Employee')}`, 400))
+	}
+	if (employee.organization.toString() != user!.organization) {
+		return next(
+			new ResponseError('Sorry, You Don\'t Have Permission To This Organization Projects Since You Don\'t It\'s Admin', 401 )
+		)
+	}
+	const deletedEmp = await EmployeeModel.updateOne(
+		{_id: empId},
+		{isDeleted: true},
+	)
+	if (!deletedEmp.modifiedCount) {
+		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
+	}
+	return res.status(200).json({message: `Employee (${employee.employeeName}) deleted successfully`})
 }

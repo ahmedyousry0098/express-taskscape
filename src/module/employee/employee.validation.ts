@@ -44,4 +44,8 @@ export const getAllEmployeeForScrumSchema = Joi.object<IOnlyObjectId>({
 export const updateProfilePhotoSchema = Joi.object({
 	file: CUSTOM_FIELDS_SCHEMAS.file.required(),
 	employeeId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
-})
+}).required()
+
+export const deleteEmployeeSchema = Joi.object({
+	empId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
+}).required()

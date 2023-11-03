@@ -33,6 +33,10 @@ const employeeSchema = new Schema<IEmployeeDocument>(
 		isFresh: {
 			type: Boolean,
 			default: true
+		},
+		isDeleted: {
+			type: Boolean,
+			default: false
 		}
 	},
 	{ timestamps: true }
@@ -45,6 +49,10 @@ employeeSchema.pre('save', async function (next) {
 	}
 	next();
 });
+
+employeeSchema.pre('find', async function (next) {
+	this.where({isDeleted: false})
+})
 
 export const EmployeeModel = model<IEmployeeDocument>(
 	'Employee',

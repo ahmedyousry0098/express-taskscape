@@ -21,7 +21,7 @@ export const createProject: RequestHandler = async (req: Request, res: Response,
     const scrum = await EmployeeModel.findOne<EmployeeSchemaType>({
         _id: scrumMaster, 
         role: UserRole.SCRUM_MASTER, 
-        organization
+        organization,
     })
     if (!scrum) {
         return next(new ResponseError('Scrum Master not exist in this oganization', 400))
@@ -29,7 +29,7 @@ export const createProject: RequestHandler = async (req: Request, res: Response,
     const employeesFounded = await EmployeeModel.find<EmployeeSchemaType>({
         _id: {$in: employees}, 
         role: UserRole.EMPLOYEE, 
-        organization
+        organization,
     })
     if (!employeesFounded) {
         return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
@@ -80,7 +80,7 @@ export const addEmployeeToProject: RequestHandler = async (req: Request, res: Re
     const foundedEmployees = await EmployeeModel.find<EmployeeSchemaType>(
         {
             _id: {$in: employees},
-            organization
+            organization,
         }
     )
     if (foundedEmployees.length < employees.length)

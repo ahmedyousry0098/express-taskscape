@@ -17,6 +17,7 @@ export interface IEmployee {
 	experience: Number;
 	employmentType: EmploymentType;
 	title: string;
+	isDeleted: boolean
 }
 
 export interface IEmployeeWithPojects extends IEmployee {

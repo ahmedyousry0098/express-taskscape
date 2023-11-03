@@ -4,6 +4,7 @@ import {
 	changeEmpStatusSchema,
 	changePasswordSchema,
 	createEmployeeSchema,
+	deleteEmployeeSchema,
 	getAllEmployeeForScrumSchema,
 	updateProfilePhotoSchema,
 } from './employee.validation';
@@ -11,6 +12,7 @@ import { asyncHandler } from '../../utils/errHandling';
 import {
 	changeEmployeeStatus,
 	createEmployee,
+	deleteEmployee,
 	employeeChangePassword,
 	employeeLogin,
 	getAllEmployee,
@@ -83,6 +85,13 @@ router.get(
 	'/my-profile',
 	authEmployee,
 	asyncHandler(getMe)
+)
+
+router.patch(
+	'/delete/:empId',
+	validate(deleteEmployeeSchema),
+	authAdmin,
+	asyncHandler(deleteEmployee)
 )
 
 export default router;
