@@ -13,12 +13,12 @@ export const addCommentSchema = Joi.object<IAddCommentSchema>({
 	text: Joi.string().required(),
 	assignToTask: CUSTOM_FIELDS_SCHEMAS.objectId,
 	auther: CUSTOM_FIELDS_SCHEMAS.objectId,
-	date: Joi.date().greater(Date.now()),
+	date: Joi.date().min(new Date().toLocaleDateString()),
 	taskId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
 }).required();
 
 export const editCommentSchema = Joi.object<IEditCommentSchema>({
 	text: Joi.string().required(),
-	date: Joi.date().greater(Date.now()),
+	date: Joi.date().min(new Date().toLocaleDateString()),
 	commentId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
 }).required();

@@ -13,7 +13,7 @@ interface IUpdateTaskSchema extends ITask {
 export const createTaskSchema = Joi.object<ICreateTaskSchema>({
 	taskName: Joi.string().required(),
 	description: Joi.string().required(),
-	startDate: Joi.date().greater(Date.now()),
+	startDate: Joi.date().min(new Date().toLocaleDateString()),
 	deadline: Joi.date().greater(Joi.ref('startDate')),
 	status: Joi.string().valid(Stauts.TODO),
 	project: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
@@ -24,7 +24,7 @@ export const createTaskSchema = Joi.object<ICreateTaskSchema>({
 export const updateTaskSchema = Joi.object<IUpdateTaskSchema>({
 	taskName: Joi.string(),
 	description: Joi.string(),
-	deadline: Joi.date().greater(Date.now()),
+	deadline: Joi.date().min(new Date().toLocaleDateString()),
 	status: Joi.string().valid(Stauts.TODO, Stauts.DOING, Stauts.DONE),
 	assignTo: CUSTOM_FIELDS_SCHEMAS.objectId,
 	taskId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),

@@ -11,7 +11,7 @@ interface IProjectId {
 
 export const createSprintSchema = Joi.object<ICreateSprintSchema>({
     sprint_name: Joi.string().required(),
-    start_date: Joi.date().greater(Date.now()),
+    start_date: Joi.date().min(new Date().toLocaleDateString()),
     deadline: Joi.date().greater(Joi.ref('start_date')),
     projectId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
     organization: CUSTOM_FIELDS_SCHEMAS.objectId,

@@ -48,12 +48,12 @@ export const createTask: RequestHandler = async (
 			new ResponseError('This member is not assigned to this project', 400)
 		);
 	}
-
 	const task = new TaskModel({
 		...req.body,
 		scrumMaster: scrumId,
-	});
-	if (!(await task.save())) {
+		sprint: sprintId
+	})
+	if (!await task.save()) {
 		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`));
 	}
 	return res.status(200).json({ message: 'Task added Successfully...', task });
