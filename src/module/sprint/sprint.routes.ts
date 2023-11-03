@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { authEmployee, authScrumMaster, isAdminOrScrum } from "../../middlewares/authentication";
+import { authEmployee, authScrumMaster, isAdminOrScrum, systemAuth } from "../../middlewares/authentication";
 import { validate } from "../../middlewares/validate";
 import { asyncHandler } from "../../utils/errHandling";
-import { createSprint, getProjectSprints } from "./sprint.controller";
-import { createSprintSchema, getProjectSprintsSchema } from "./sprint.validation";
+import { createSprint, getProjectSprints, sprintDetails } from "./sprint.controller";
+import { createSprintSchema, getProjectSprintsSchema, getSprintDetailsSchema } from "./sprint.validation";
 
 const router = Router()
 
@@ -18,8 +18,14 @@ router.post(
 router.get(
     '/:projectId',
     validate(getProjectSprintsSchema),
-    // authEmployee,
+    systemAuth,
     asyncHandler(getProjectSprints)
 )
 
+router.get(
+    '/details/:sprintId',
+    validate(getSprintDetailsSchema),
+    systemAuth,
+    asyncHandler(sprintDetails)
+)
 export default router

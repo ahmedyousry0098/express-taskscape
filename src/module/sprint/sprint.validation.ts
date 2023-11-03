@@ -8,6 +8,9 @@ interface ICreateSprintSchema extends ISprint {
 interface IProjectId {
     projectId: string
 }
+interface ISprintId {
+    sprintId: string
+}
 
 export const createSprintSchema = Joi.object<ICreateSprintSchema>({
     sprint_name: Joi.string().required(),
@@ -19,4 +22,8 @@ export const createSprintSchema = Joi.object<ICreateSprintSchema>({
 
 export const getProjectSprintsSchema = Joi.object<IProjectId>({
     projectId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
-})
+}).required()
+
+export const getSprintDetailsSchema = Joi.object<ISprintId>({
+    sprintId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
+}).required()

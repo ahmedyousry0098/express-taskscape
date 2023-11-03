@@ -55,3 +55,28 @@ export const getProjectSprints: RequestHandler = async (req, res, next) => {
     }
     return res.status(200).json({message: 'all project sprints', sprints})
 }
+
+export const sprintDetails: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+    const {sprintId} = req.params
+    const sprint = await SprintModel.findById<SprintSchemaType>(sprintId).populate([
+        {
+            path: 'project',
+            select: 'projectName description startDate deadline'
+        }
+    ])
+    
+    if (!sprint) {
+        return next(new ResponseError(`${ERROR_MESSAGES.notFound('Sprint')}`, 400))
+    }
+    const tasks = await TaskModel.find({sprint: sprintId}).populate([
+        {
+            path: 'scrumMaster',
+            select: '-password -lastChangePassword -createdBy -organization'
+        },
+        {
+            path: 'assignTo',
+            select: '-password -lastChangePassword -createdBy -organization'
+        }
+    ]).select('-sprint -project')
+    return res.status(200).json({message: `Sprint (${sprint.sprint_name}) details`, details: {...sprint.toJSON(), tasks}})
+}
