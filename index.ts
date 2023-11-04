@@ -13,7 +13,9 @@ import taskRouter from './src/module/task/task.routes';
 import commentRouter from './src/module/comment/comment.routes';
 import sprintRouter from './src/module/sprint/sprint.routes'
 import { config } from 'dotenv';
+import { Server } from 'socket.io';
 import cors from 'cors';
+import { getIo, initIo } from './src/utils/socket';
 config({ path: './.env' });
 
 const app = express();
@@ -48,6 +50,14 @@ process.on('unhandledRejection', (err) => {
 	console.error(`${err}`);
 });
 
-app.listen(port, () => {
+const httpServer = app.listen(port, () => {
 	console.log(`app running on port ${port}`);
 });
+
+initIo(httpServer)
+
+getIo().on('connection', (socket) => {
+	socket.on('updateSocketId', async ({token}) => {
+		console.log({token}, "$$");
+	})
+})
