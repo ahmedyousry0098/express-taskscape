@@ -154,7 +154,10 @@ export const updateStatus: RequestHandler = async (
 
 export const getEmployeeTasks: RequestHandler = async (req, res, next) => {
 	const {empId} = req.params
-	const employee = await EmployeeModel.findById<EmployeeSchemaType>(empId)
+	const employee = await EmployeeModel.findOne<EmployeeSchemaType>({
+		_id: empId,
+		role: UserRole.EMPLOYEE
+	})
 	if (!employee) {
 		return next(new ResponseError('Employee Is Not Exist', 400))
 	}
@@ -173,7 +176,36 @@ export const getEmployeeTasks: RequestHandler = async (req, res, next) => {
 		}
 	])
 	if (!tasks) {
-		return res.status(200).json({message: 'No tasks Found'})
+		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
+	}
+	return res.status(200).json({message: 'employee tasks:', tasks})
+}
+
+export const getScrumsTasks: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+	const {scrumId} = req.params
+	const scrum = await EmployeeModel.findOne<EmployeeSchemaType>({
+		_id: scrumId,
+		role: UserRole.SCRUM_MASTER
+	})
+	if (!scrum) {
+		return next(new ResponseError('Scrum Master Is Not Exist', 400))
+	}
+	const tasks = await TaskModel.find<TaskSchemaType>({scrumMaster: scrumId}).populate([
+		{
+			path: 'sprint',
+			select: '-project'
+		},
+		{
+			path: 'project',
+			select: '-organization -employees',
+		},
+		{
+			path: 'assignTo',
+			select: '-password -createdBy -lastChangePassword'
+		}
+	])
+	if (!tasks) {
+		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
 	}
 	return res.status(200).json({message: 'employee tasks:', tasks})
 }

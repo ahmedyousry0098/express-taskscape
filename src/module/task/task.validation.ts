@@ -38,3 +38,7 @@ export const updateStatusSchema = Joi.object<IUpdateTaskSchema>({
 export const getEmployeeTasksSchema = Joi.object({
 	empId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
 }).required()
+
+export const getScrumTasksSchema = Joi.object({
+	scrumId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
+}).required()
