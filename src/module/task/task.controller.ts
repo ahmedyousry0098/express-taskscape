@@ -165,7 +165,7 @@ export const getEmployeeTasks: RequestHandler = async (req, res, next) => {
 		},
 		{
 			path: 'project',
-			select: '*organization -employees',
+			select: '-organization -employees',
 			populate: {
 				path: 'scrumMaster',
 				select: 'employeeName'
