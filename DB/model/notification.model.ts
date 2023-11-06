@@ -20,6 +20,10 @@ const notificationSchema = new Schema<INotification>({
     type: {
         type: String
     },
+    isReaded: {
+        type: Boolean,
+        default: false
+    }
 }, {
     timestamps: true
 })

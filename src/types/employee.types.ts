@@ -18,6 +18,7 @@ export interface IEmployee {
 	employmentType: EmploymentType;
 	title: string;
 	isDeleted: boolean
+	socketId: string
 }
 
 export interface IEmployeeWithPojects extends IEmployee {

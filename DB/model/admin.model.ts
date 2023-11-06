@@ -28,7 +28,8 @@ const adminSchema = new Schema<IAdminDocument>(
 			type: Types.ObjectId,
 			ref: 'Organization',
 		},
-		lastChangePassword: {type: Date}
+		lastChangePassword: {type: Date},
+		socketId: String
 	},
 	{
 		timestamps: true,

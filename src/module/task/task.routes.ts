@@ -17,7 +17,7 @@ import { createTask, getEmployeeTasks, updateStatus, updateTask } from './task.c
 const router = Router();
 router.post(
 	'/createtask/:sprintId',
-	// validate(createTaskSchema),
+	validate(createTaskSchema),
 	authEmployee,
 	authScrumMaster,
 	asyncHandler(createTask)

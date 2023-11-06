@@ -13,9 +13,8 @@ import taskRouter from './src/module/task/task.routes';
 import commentRouter from './src/module/comment/comment.routes';
 import sprintRouter from './src/module/sprint/sprint.routes'
 import { config } from 'dotenv';
-import { Server } from 'socket.io';
 import cors from 'cors';
-import { getIo, initIo } from './src/utils/socket';
+import { initIo } from './src/utils/socket';
 config({ path: './.env' });
 
 const app = express();
@@ -43,7 +42,7 @@ app.use('/sprint', sprintRouter);
 app.use(globalErrorHandler);
 
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
-	return res.status(404).json({ message: 'page not found' });
+	return res.status(404).json({ message: 'In-valid Route Please Check URL Or Method' });
 });
 
 process.on('unhandledRejection', (err) => {
@@ -55,9 +54,3 @@ const httpServer = app.listen(port, () => {
 });
 
 initIo(httpServer)
-
-getIo().on('connection', (socket) => {
-	socket.on('updateSocketId', async ({token}) => {
-		console.log({token}, "$$");
-	})
-})

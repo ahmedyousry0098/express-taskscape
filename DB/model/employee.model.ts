@@ -37,7 +37,8 @@ const employeeSchema = new Schema<IEmployeeDocument>(
 		isDeleted: {
 			type: Boolean,
 			default: false
-		}
+		},
+		socketId: String
 	},
 	{ timestamps: true }
 );
