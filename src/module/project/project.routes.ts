@@ -31,7 +31,7 @@ router.patch(
 router.put(
     '/update/:projectId',
     validate(updateProjectSchema),
-    authAdmin,
+    isAdminOrScrum,
     asyncHandler(updateProject)
 )
 
