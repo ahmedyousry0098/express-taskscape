@@ -5,5 +5,6 @@ export interface IAdmin {
 	email: string;
 	password: string;
 	organization: typeof Types.ObjectId;
-	lastChangePassword: Date
+	lastChangePassword: Date;
+	socketId: string
 }

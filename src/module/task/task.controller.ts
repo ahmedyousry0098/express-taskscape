@@ -12,6 +12,8 @@ import { ERROR_MESSAGES } from '../../constants/error_messages';
 import { UserRole } from '../../constants/user.role';
 import { TaskModel, TaskSchemaType } from '../../../DB/model/task.model';
 import { SprintModel, SprintSchemaType } from '../../../DB/model/sprint.model';
+import { NotificationModel } from '../../../DB/model/notification.model';
+import { getIo } from '../../utils/socket';
 
 export const createTask: RequestHandler = async (
 	req: Request,
@@ -33,7 +35,7 @@ export const createTask: RequestHandler = async (
 	if (!sprint) {
 		return next(new ResponseError(`${ERROR_MESSAGES.notFound('Sprint')}`, 400));
 	}
-	const assignToEmployee = await EmployeeModel.find<EmployeeSchemaType>({
+	const assignToEmployee = await EmployeeModel.findOne<EmployeeSchemaType>({
 		_id: assignTo,
 		role: UserRole.EMPLOYEE,
 	})
@@ -56,6 +58,12 @@ export const createTask: RequestHandler = async (
 	if (!await task.save()) {
 		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`));
 	}
+	const newNotification = await NotificationModel.create({
+		title: `Scrum Master assign you new Task in project (${project.projectName})`,
+		description: `You have new task in sprint ${sprint.sprint_name}`,
+		to: assignToEmployee._id
+	})
+	getIo().to(assignToEmployee.socketId).emit('pushNew', {msg: newNotification.title})
 	return res.status(200).json({ message: 'Task added Successfully...', task });
 };
 
@@ -89,8 +97,9 @@ export const updateTask: RequestHandler = async (
 		);
 	}
 
+	let assignToEmployee: EmployeeSchemaType | null
 	if (req.body.assignTo) {
-		const assignToEmployee = await EmployeeModel.findOne<EmployeeSchemaType>({
+		assignToEmployee = await EmployeeModel.findOne<EmployeeSchemaType>({
 			_id: req.body.assignTo,
 			role: UserRole.EMPLOYEE,
 		});
@@ -116,6 +125,12 @@ export const updateTask: RequestHandler = async (
 	if (!updatedTask) {
 		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`));
 	}
+	const newNotification = await NotificationModel.create({
+		title: `Task: ${task.taskName} was updated`,
+		description: `Task (${task.taskName}) was update please check your tasks to get last update`,
+		to: assignToEmployee!._id
+	})
+	getIo().to(assignToEmployee!.socketId).emit('pushNew', {msg: newNotification.title})
 	return res
 		.status(200)
 		.json({ message: 'Task updated Successfully...', updatedTask });
@@ -147,6 +162,16 @@ export const updateStatus: RequestHandler = async (
 	if (!updateStatus) {
 		return next(new ResponseError(ERROR_MESSAGES.serverErr));
 	}
+	const scrum = await EmployeeModel.findById(updateStatus.scrumMaster)
+	if (!scrum) {
+		return next(new ResponseError('Task Scrum Master has been deleted!', 400))
+	}
+	const newNotification = await NotificationModel.create({
+		title: `Task ${task.taskName} status has been changed`,
+		description: `Task ${task.taskName} statushas been changed to ${updateStatus.status}`,
+		to: scrum._id
+	})
+	getIo().to(scrum.socketId).emit('pushNew', {message: newNotification.title})
 	return res
 		.status(200)
 		.json({ message: 'Status updated Successfully...', updateStatus });
@@ -207,5 +232,5 @@ export const getScrumsTasks: RequestHandler = async (req: Request, res: Response
 	if (!tasks) {
 		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
 	}
-	return res.status(200).json({message: 'employee tasks:', tasks})
+	return res.status(200).json({message: 'Scrum tasks:', tasks})
 }

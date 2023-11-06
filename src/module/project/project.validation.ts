@@ -17,7 +17,8 @@ interface IUpdateProjectSchema {
     projectName: string;
     description: string;
     startDate: Date;
-    deadline: Date
+    deadline: Date;
+    projectId: string
 }
 interface IOrgId {
     orgId: string
@@ -59,6 +60,7 @@ export const updateProjectSchema = Joi.object<IUpdateProjectSchema>({
     description: Joi.string(),
     startDate: Joi.date().min(new Date().toLocaleDateString()),
     deadline: Joi.date().greater(Joi.ref('startDate')),
+    projectId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
 }).required()
 
 export const getOrgProjectsSchema = Joi.object<IOrgId>({

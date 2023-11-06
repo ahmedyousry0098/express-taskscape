@@ -14,6 +14,7 @@ import commentRouter from './src/module/comment/comment.routes';
 import sprintRouter from './src/module/sprint/sprint.routes'
 import { config } from 'dotenv';
 import cors from 'cors';
+import { initIo } from './src/utils/socket';
 config({ path: './.env' });
 
 const app = express();
@@ -41,13 +42,15 @@ app.use('/sprint', sprintRouter);
 app.use(globalErrorHandler);
 
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
-	return res.status(404).json({ message: 'page not found' });
+	return res.status(404).json({ message: 'In-valid Route Please Check URL Or Method' });
 });
 
 process.on('unhandledRejection', (err) => {
 	console.error(`${err}`);
 });
 
-app.listen(port, () => {
+const httpServer = app.listen(port, () => {
 	console.log(`app running on port ${port}`);
 });
+
+initIo(httpServer)

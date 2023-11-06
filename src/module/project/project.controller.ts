@@ -7,6 +7,9 @@ import { ERROR_MESSAGES } from "../../constants/error_messages";
 import { ProjectModel, ProjectSchemaType } from "../../../DB/model/project.model";
 import { SprintModel, SprintSchemaType } from "../../../DB/model/sprint.model";
 import { TaskModel, TaskSchemaType } from "../../../DB/model/task.model";
+import { getIo } from "../../utils/socket";
+import { NotificationModel } from "../../../DB/model/notification.model";
+import { NotifyMessage } from "../../constants/notification_messages";
 
 export const createProject: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
     const {organization, scrumMaster, employees} = req.body 
@@ -56,6 +59,14 @@ export const createProject: RequestHandler = async (req: Request, res: Response,
     if (!savedProject) {
         return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
     }
+    for (let emp of employeesFounded) {
+        const newNotification = await NotificationModel.create({
+            title: 'You Added To New Project!',
+            description: `${NotifyMessage.ADDED_TO_PROJECT(project.projectName, org.organization_name)}`,
+            to: emp._id,
+        })
+        getIo().to(emp.socketId).emit('pushNew', {msg: newNotification.title})
+    }
     return res.status(201).json({message: 'project added successfully', project})
 }
 
@@ -67,14 +78,16 @@ export const addEmployeeToProject: RequestHandler = async (req: Request, res: Re
     if (organization !== user!.organization) {
         return next(new ResponseError('Sorry Cannot Access This Organization information Since You don\'t belong To It', 401));
     }
-    const FoundedProject = await ProjectModel.findOne<ProjectSchemaType>({_id: project, organization})
-    if (!FoundedProject) {
+    const foundedProject = await ProjectModel.findOne<ProjectSchemaType>({_id: project, organization})
+    if (!foundedProject) {
         return next(new ResponseError('Sorry This Project doesn\'t exist in this organization', 400))
     }
     for (let emp of employees) {
-        if (FoundedProject.employees.includes(emp)) {
+        if (foundedProject.employees.includes(emp)) {
             const existsEmployee = await EmployeeModel.findById(emp).select('employeeName')
-            return next(new ResponseError(`${existsEmployee?.employeeName} already exist in this project`, 409))
+            return next(
+                new ResponseError(`${existsEmployee?.employeeName} already exist in this project, Please Select `, 409)
+            )
         }
     }
     const foundedEmployees = await EmployeeModel.find<EmployeeSchemaType>(
@@ -83,11 +96,10 @@ export const addEmployeeToProject: RequestHandler = async (req: Request, res: Re
             organization,
         }
     )
-    if (foundedEmployees.length < employees.length)
-    {
+    if (foundedEmployees.length < employees.length) {
         const empIds = foundedEmployees.map(emp => emp._id?.toString())
         const missingEmployees = (employees as string[]).filter((id: string) => !empIds.includes(id)).join(", ")
-        return next(new ResponseError(`Sorry ${missingEmployees} (employees id) are not exist in this organization`, 400))
+        return next(new ResponseError(`Sorry ${missingEmployees} (employee id) are not exist in this organization`, 400))
     }
     const updatedProject = await ProjectModel.findByIdAndUpdate(
         {_id: project},
@@ -96,6 +108,14 @@ export const addEmployeeToProject: RequestHandler = async (req: Request, res: Re
     )
     if (!updatedProject) {
         return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
+    }
+    for (let emp of foundedEmployees) {
+        const newNotification = await NotificationModel.create({
+            title: 'You Added To New Project!',
+            description: `${NotifyMessage.ADDED_TO_PROJECT(foundedProject.projectName, org.organization_name)}`,
+            to: emp._id,
+        })
+        getIo().to(emp.socketId).emit('pushNew', {msg: newNotification.title})
     }
     return res.status(200).json({message: 'Employees added to project successfully', project: updatedProject})
 }
@@ -147,6 +167,12 @@ export const removeEmployeeFromProject: RequestHandler = async (req: Request, re
     if (!updatedProject) {
         return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
     }
+    const newNotification = await NotificationModel.create({
+        title: `You Removed From ${updatedProject.projectName} Project`,
+        description: `${NotifyMessage.REMOVED_FROM_PROJECT(updatedProject.projectName, org.organization_name)}`,
+        to: foundedEmployee._id
+    })
+    getIo().to(foundedEmployee.socketId).emit('pushNew', {msg: newNotification.title})
     return res.status(200).json({message: 'employee removed from project successfully', project: updatedProject})
 }
 
@@ -165,10 +191,16 @@ export const updateProject: RequestHandler = async (req: Request, res: Response,
     const updatedProject = await ProjectModel.updateOne(
         {_id: projectId},
         req.body,
-    )
+    ).populate([
+        {
+            path: 'employees',
+            select: '-password'
+        }
+    ])
     if (!updatedProject.matchedCount) {
         return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
     }
+
     return res.status(200).json({message: `project (${project.projectName}) updated successfully`})
 }
 
