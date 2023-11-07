@@ -38,7 +38,8 @@ const employeeSchema = new Schema<IEmployeeDocument>(
 			type: Boolean,
 			default: false
 		},
-		socketId: String
+		socketId: String,
+		resetPasswordCode: String
 	},
 	{ timestamps: true }
 );

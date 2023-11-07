@@ -97,9 +97,8 @@ export const updateTask: RequestHandler = async (
 		);
 	}
 
-	let assignToEmployee: EmployeeSchemaType | null
 	if (req.body.assignTo) {
-		assignToEmployee = await EmployeeModel.findOne<EmployeeSchemaType>({
+		const assignToEmployee = await EmployeeModel.findOne<EmployeeSchemaType>({
 			_id: req.body.assignTo,
 			role: UserRole.EMPLOYEE,
 		});
@@ -114,23 +113,27 @@ export const updateTask: RequestHandler = async (
 				new ResponseError('This member is not assigned to this project', 400)
 			);
 		}
+		req.body.assignTo = assignToEmployee._id
 	}
 
-	const updatedTask = await TaskModel.findByIdAndUpdate<TaskSchemaType>(
+	const updatedTask = await TaskModel.findByIdAndUpdate(
 		taskId,
 		req.body,
 		{ new: true }
-	);
+	)
 
 	if (!updatedTask) {
 		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`));
 	}
+
+	const assignTo = await EmployeeModel.findById(updatedTask?.assignTo)
+
 	const newNotification = await NotificationModel.create({
 		title: `Task: ${task.taskName} was updated`,
 		description: `Task (${task.taskName}) was update please check your tasks to get last update`,
-		to: assignToEmployee!._id
+		to: assignTo!._id
 	})
-	getIo().to(assignToEmployee!.socketId).emit('pushNew', {msg: newNotification.title})
+	getIo().to(assignTo!.socketId).emit('pushNew', {msg: newNotification.title})
 	return res
 		.status(200)
 		.json({ message: 'Task updated Successfully...', updatedTask });
@@ -142,7 +145,7 @@ export const updateStatus: RequestHandler = async (
 	next: NextFunction
 ) => {
 	const taskId = req.params.taskId;
-	const status = req.body;
+	const {status} = req.body;
 	const task = await TaskModel.findById<TaskSchemaType>({
 		_id: taskId,
 	});

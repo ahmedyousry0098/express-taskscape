@@ -17,6 +17,7 @@ export const initIo = (httpServer: httpServer) => {
         socket.on('updateSocketId', async ({token}) => {
             const user = await socketAuth(token, socketId)
             if (!user) return
+            console.log('user socket updated', socketId);
         })
         
         socket.on('fetchNotifications', async ({_id, userRole = 'employee'}) => {
@@ -32,7 +33,7 @@ export const initIo = (httpServer: httpServer) => {
         })
 
         socket.on('markNotificationsRead', async ({_id, userRole = 'employee'}) => {
-            await NotificationModel.updateMany({to: userRole._id}, {isReaded: true})
+            await NotificationModel.updateMany({to: _id}, {isReaded: true})
         })
     })
     return io

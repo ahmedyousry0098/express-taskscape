@@ -16,7 +16,6 @@ import { config } from 'dotenv';
 import cors from 'cors';
 import { initIo } from './src/utils/socket';
 config({ path: './.env' });
-
 const app = express();
 const port = process.env.PORT;
 

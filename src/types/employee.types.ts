@@ -17,8 +17,9 @@ export interface IEmployee {
 	experience: Number;
 	employmentType: EmploymentType;
 	title: string;
-	isDeleted: boolean
-	socketId: string
+	isDeleted: boolean;
+	socketId: string;
+	resetPasswordCode: string;
 }
 
 export interface IEmployeeWithPojects extends IEmployee {

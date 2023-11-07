@@ -5,7 +5,9 @@ import {
 	changePasswordSchema,
 	createEmployeeSchema,
 	deleteEmployeeSchema,
+	forgetPasswordSchema,
 	getAllEmployeeForScrumSchema,
+	resetPasswordSchema,
 	updateProfilePhotoSchema,
 } from './employee.validation';
 import { asyncHandler } from '../../utils/errHandling';
@@ -15,9 +17,11 @@ import {
 	deleteEmployee,
 	employeeChangePassword,
 	employeeLogin,
+	forgetPassword,
 	getAllEmployee,
 	getMe,
 	getOrgScrums,
+	resetPassword,
 	updateEmployeePhoto,
 } from './employee.controller';
 import {
@@ -44,6 +48,18 @@ router.post(
 	'/login', 
 	validate(loginAdminSchema), 
 	asyncHandler(employeeLogin)
+);
+
+router.patch(
+	`/forget-password`,
+	validate(forgetPasswordSchema),
+	asyncHandler(forgetPassword)
+);
+
+router.patch(
+	`/reset-password`,
+	validate(resetPasswordSchema),
+	asyncHandler(resetPassword)
 );
 
 router.patch(

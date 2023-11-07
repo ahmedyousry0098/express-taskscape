@@ -16,6 +16,14 @@ interface IChangeEmployeePassword extends Pick<IEmployee, 'password'> {
 interface IOnlyObjectId {
 	orgId: string;
 }
+interface IForgetPass {
+	email: string
+}
+interface IResetPass {
+	email: string;
+	newPassword: string;
+	code: string;
+}
 
 export const createEmployeeSchema = Joi.object<ICreateEmployeeSchema>({
 	employeeName: Joi.string().min(3).max(20).required(),
@@ -32,6 +40,16 @@ export const changePasswordSchema = Joi.object<IChangeEmployeePassword>({
 	newPassword: Joi.string().invalid(Joi.ref('password')).required(),
 	employeeId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
 }).required();
+
+export const forgetPasswordSchema = Joi.object<IForgetPass>({
+	email: Joi.string().email().required(),
+})
+
+export const resetPasswordSchema = Joi.object<IResetPass>({
+	email: Joi.string().email().required(),
+	newPassword: Joi.string().required(),
+	code: Joi.string().length(5).required()
+})
 
 export const changeEmpStatusSchema = Joi.object({
 	empId: CUSTOM_FIELDS_SCHEMAS.objectId.required()

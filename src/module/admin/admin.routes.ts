@@ -15,7 +15,13 @@ router.post(
 	validate(registerAdminSchema),
 	asyncHandler(createAdmin)
 );
-router.post('/login', validate(loginAdminSchema), asyncHandler(login));
+
+router.post(
+	'/login', 
+	validate(loginAdminSchema), 
+	asyncHandler(login)
+);
+
 router.patch(
 	'/changepassword',
 	validate(changePasswordSchema),
