@@ -6,5 +6,6 @@ export interface IAdmin {
 	password: string;
 	organization: typeof Types.ObjectId;
 	lastChangePassword: Date;
-	socketId: string
+	socketId: string;
+	resetPasswordCode?: string;
 }

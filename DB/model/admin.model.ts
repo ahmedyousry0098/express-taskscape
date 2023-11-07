@@ -29,7 +29,8 @@ const adminSchema = new Schema<IAdminDocument>(
 			ref: 'Organization',
 		},
 		lastChangePassword: {type: Date},
-		socketId: String
+		socketId: String,
+		resetPasswordCode: String
 	},
 	{
 		timestamps: true,

@@ -1,7 +1,7 @@
 export const resetPassowrdTemplate = (name: string, code: string) => (
     `
     <!DOCTYPE html>
-    <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+    <html lang="en" >
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width">
@@ -93,18 +93,20 @@ export const resetPassowrdTemplate = (name: string, code: string) => (
                             <tbody>
                                 <tr>
                                     <td style="text-align:center;padding: 30px 30px 15px 30px;">
-                                        <h2 style="font-size: 18px; color: #1ee0ac; font-weight: 600; margin: 0;">Password Reseted</h2>
+                                        <h2 style="font-size: 18px; color: #1ee0ac; font-weight: 600; margin: 0;">Reset Password Code</h2>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:center;padding: 0 30px 20px">
-                                        <p style="margin-bottom: 10px;">Hi Sundar,</p>
-                                        <p>You Successfully Reseted Your Password. Thanks For being with Us.</p>
+                                        <p style="margin-bottom: 10px;">Hello Sir,</p>
+                                        <p>Please Use Code Below To Reset Your Account Password.</p>
+                                        <br>
+                                        <p style="font-size: 20px; font-weight: bolds">${code}</p>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td style="text-align:center;padding: 0 30px 40px">
-                                        <p style="margin: 0; font-size: 13px; line-height: 22px; color:#9ea8bb;">This is an automatically generated email please do not reply to this email. If you face any issues, please contact us at  techmindhelps@gmail.comm</p>
+                                        <p style="margin: 0; font-size: 13px; line-height: 22px; color:#9ea8bb;">This is an automatically generated email please do not reply to this email. If you face any issues, please contact us at taskspace50@gmail.com</p>
                                     </td>
                                 </tr>
                             </tbody>

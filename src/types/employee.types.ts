@@ -19,7 +19,7 @@ export interface IEmployee {
 	title: string;
 	isDeleted: boolean;
 	socketId: string;
-	resetPasswordCode: string;
+	resetPasswordCode?: string;
 }
 
 export interface IEmployeeWithPojects extends IEmployee {

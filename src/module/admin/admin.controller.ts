@@ -15,6 +15,8 @@ import { confirmMailTemp } from '../../utils/mail_templates/confirm_mail';
 import { sign } from 'jsonwebtoken';
 import { compareSync } from 'bcryptjs';
 import { UserRole } from '../../constants/user.role';
+import { generateRandomString } from '../../utils/randomCode';
+import { resetPassowrdTemplate } from '../../utils/mail_templates/reset_password';
 
 export const createAdmin: RequestHandler = async (
 	req: Request,
@@ -117,6 +119,45 @@ export const login: RequestHandler = async (
 	delete adm.password
 	return res.status(200).json({ message: 'logged In Successfully', token, admin: adm });
 };
+
+export const forgetPassword: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+	const {email} = req.body
+	const user = await AdminModel.findOne({email})
+	if (!user) {
+		return next(new ResponseError(`${ERROR_MESSAGES.notFound('User')}`, 400))
+	}
+	const code = generateRandomString(5)
+	user.resetPasswordCode = code
+	const mailInfo = await sendMail({
+		to: user.email,
+		subject: 'reset password',
+		html: resetPassowrdTemplate(user.adminName, code)
+	})
+	if (!mailInfo.accepted.length) {
+		return next(new ResponseError(`${ERROR_MESSAGES.unavailableService}`))
+	}
+	if (!await user.save()) {
+		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
+	}
+	return res.status(200).json({message: 'Please Check Your Mail, Reset Password Code Sended There'})
+}
+
+export const resetPassword: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+	const {code, newPassword, email} = req.body
+	const account = await AdminModel.findOne({email})
+	if (!account) {
+		return next(new ResponseError(`${ERROR_MESSAGES.notFound('User')}`, 400))
+	}
+	if (account.resetPasswordCode != code) {
+		return next(new ResponseError(`In-valid reset password code`, 400))
+	}
+	account.password = newPassword
+	account.resetPasswordCode = undefined
+	if (!account.save()) {
+		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
+	}
+	return res.status(200).json({message: 'password changed successfully'})
+}
 
 export const changeAdminPassword: RequestHandler = async (
 	req: Request,

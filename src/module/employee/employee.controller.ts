@@ -124,6 +124,7 @@ export const resetPassword: RequestHandler = async (req: Request, res: Response,
 		return next(new ResponseError(`In-valid reset password code`, 400))
 	}
 	account.password = newPassword
+	account.resetPasswordCode = undefined
 	if (!account.save()) {
 		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
 	}

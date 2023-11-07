@@ -17,14 +17,12 @@ export const initIo = (httpServer: httpServer) => {
         socket.on('updateSocketId', async ({token}) => {
             const user = await socketAuth(token, socketId)
             if (!user) return
-            console.log('user socket updated', socketId);
         })
         
         socket.on('fetchNotifications', async ({_id, userRole = 'employee'}) => {
             if (userRole == 'employee') {
                 const user = await EmployeeModel.findById(_id)
                 if (!user) {
-                    console.log('user not found');
                     return 
                 }
                 const myNotifications = await NotificationModel.find({to: user._id})
