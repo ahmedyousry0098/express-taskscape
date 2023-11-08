@@ -158,8 +158,8 @@ export const updateStatus: RequestHandler = async (
 		);
 	}
 	const updateStatus = await TaskModel.findByIdAndUpdate<TaskSchemaType>(
-		taskId,
-		status,
+		{_id: taskId},
+		{status},
 		{ new: true }
 	);
 	if (!updateStatus) {
