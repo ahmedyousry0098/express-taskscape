@@ -5,7 +5,7 @@ import { asyncHandler } from "../../utils/errHandling";
 import { filesCategoriesSchema } from "../../constants/file_categories";
 import { validate } from "../../middlewares/validate";
 import { createOrganizationSchema, getOrgByIdSchema, updateOrganizationSchema } from "./organization.validation";
-import { authAdmin } from "../../middlewares/authentication";
+import { authAdmin, systemAuth } from "../../middlewares/authentication";
 
 const router = Router()
 
@@ -19,6 +19,7 @@ router.post(
 router.get(
     '/:orgId',
     validate(getOrgByIdSchema),
+    authAdmin,
     asyncHandler(getOrganizationById)
 )
 

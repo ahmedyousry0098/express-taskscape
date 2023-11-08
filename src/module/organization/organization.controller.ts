@@ -64,7 +64,7 @@ export const getOrganizationById: RequestHandler = async (
 	}
 	const orgAdmin = await AdminModel.findOne<AdminSchemaType>({
 		organization: org._id,
-	});
+	}).select('-password')
 	return res
 		.status(200)
 		.json({ message: 'done', organization: org, admin: orgAdmin });
