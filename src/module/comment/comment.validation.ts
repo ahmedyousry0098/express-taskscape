@@ -8,6 +8,9 @@ interface IAddCommentSchema extends IComment {
 interface IEditCommentSchema extends IComment {
 	commentId: string;
 }
+interface IGetCommentsSchema {
+	taskId: string
+}
 
 export const addCommentSchema = Joi.object<IAddCommentSchema>({
 	text: Joi.string().required(),
@@ -22,3 +25,7 @@ export const editCommentSchema = Joi.object<IEditCommentSchema>({
 	date: Joi.date().min(new Date().toLocaleDateString()),
 	commentId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
 }).required();
+
+export const getCommentsSchema = Joi.object<IGetCommentsSchema>({
+	taskId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
+})

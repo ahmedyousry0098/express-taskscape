@@ -92,3 +92,18 @@ export const editComment: RequestHandler = async (
 		.status(200)
 		.json({ message: 'Comment edited Successfully...', comment });
 };
+
+export const getTaskComments: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+	const {taskId} = req.params
+	const task = await TaskModel.findById<TaskSchemaType>(taskId) 
+	if (!task) {
+		return next(new ResponseError(`${ERROR_MESSAGES.notFound('Task')}`))
+	}
+	const comments = await CommentModel.find({assignToTask: task._id}).populate([
+		{
+			path: "auther",
+			select: 'employeeName email role profile_photo'
+		}
+	])
+	return res.status(200).json({message: `${task.taskName} Comments`, comments})
+}

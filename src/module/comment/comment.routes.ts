@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { authEmployee } from '../../middlewares/authentication';
+import { authEmployee, systemAuth } from '../../middlewares/authentication';
 import { validate } from '../../middlewares/validate';
-import { addCommentSchema, editCommentSchema } from './comment.validation';
+import { addCommentSchema, editCommentSchema, getCommentsSchema } from './comment.validation';
 import { asyncHandler } from '../../utils/errHandling';
-import { addComment, editComment } from './comment.controller';
+import { addComment, editComment, getTaskComments } from './comment.controller';
 
 const router = Router();
 router.post(
@@ -18,4 +18,10 @@ router.patch(
 	validate(editCommentSchema),
 	asyncHandler(editComment)
 );
+router.get(
+	`/:taskId`,
+	validate(getCommentsSchema),
+	authEmployee,
+	asyncHandler(getTaskComments)
+)
 export default router;
