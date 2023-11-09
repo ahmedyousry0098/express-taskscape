@@ -205,7 +205,7 @@ export const getOrgProjects: RequestHandler = async (req: Request, res: Response
     if (orgId !== user!.organization) {
         return next(new ResponseError('Sorry Cannot Access This Organization information Since You don\'t belong To It', 401));
     }
-    const projects = await ProjectModel.find<OrganizationSchemaType>({organization: orgId}).populate([
+    const cursor = ProjectModel.find<OrganizationSchemaType>({organization: orgId}).populate([
         {
             path: 'scrumMaster',
             select: '-password -createdBy -organization',
@@ -214,18 +214,25 @@ export const getOrgProjects: RequestHandler = async (req: Request, res: Response
         {
             path: 'employees',
             select: '-password -createdBy -organization',
-        },
-        {
-            path: 'organization'
         }
-    ])
-    if (!projects) {
-        return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
+    ]).select('-organization').cursor()
+    
+    let projectsWithSprints = []
+    for (let project = await cursor.next(); project != null; project = await cursor.next()) {
+        const sprintCursor = SprintModel.find({project: project._id}).cursor()
+        let sprints = []
+        for (let sprint = await sprintCursor.next(); sprint != null; sprint = await sprintCursor.next()) {
+            const tasks = await TaskModel.find({sprint: sprint._id}).populate([
+                {
+                    path: 'assignTo',
+                    select: 'email employeeName'
+                }
+            ]).select('-project')
+            sprints.push({...sprint.toJSON(), tasks})
+        }
+        projectsWithSprints.push({...project.toJSON(), sprints})
     }
-    if (!projects.length) {
-        return res.status(200).json({message: 'No Projects founded in this organization'})
-    }
-    return res.status(200).json({projects})
+    return res.status(200).json({projects: projectsWithSprints})
 }
 
 export const getEmployeeProjects: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
@@ -295,7 +302,7 @@ export const projectDetails: RequestHandler = async (req: Request, res: Response
 
     let sprints = []
     for (let sprint = await cursor.next(); sprint != null ; sprint = await cursor.next()) {
-        const tasks = await TaskModel.find<TaskSchemaType>().populate([
+        const tasks = await TaskModel.find<TaskSchemaType>({sprint: sprint._id}).populate([
             {
                 path: 'assignTo',
                 select: 'employeeName email role profile_photo experience workingTime'
