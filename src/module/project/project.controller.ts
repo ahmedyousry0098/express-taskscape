@@ -117,7 +117,7 @@ export const addEmployeeToProject: RequestHandler = async (req: Request, res: Re
         })
         getIo().to(emp.socketId).emit('pushNew', {msg: newNotification.title})
     }
-    return res.status(200).json({message: 'Employees added to project successfully', project: updatedProject})
+    return res.status(200).json({message: 'Employees added to project successfully', added_employees: foundedEmployees})
 }
 
 export const removeEmployeeFromProject: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
@@ -153,17 +153,7 @@ export const removeEmployeeFromProject: RequestHandler = async (req: Request, re
             $pull: {employees: employee}
         },
         {new: true}
-    ).populate([
-        {
-            path: 'scrumMaster',
-            select: '-password -createdBy -organization',
-            
-        },
-        {
-            path: 'employees',
-            select: '-password -createdBy -organization',
-        }
-    ])
+    )
     if (!updatedProject) {
         return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
     }
@@ -173,7 +163,7 @@ export const removeEmployeeFromProject: RequestHandler = async (req: Request, re
         to: foundedEmployee._id
     })
     getIo().to(foundedEmployee.socketId).emit('pushNew', {msg: newNotification.title})
-    return res.status(200).json({message: 'employee removed from project successfully', project: updatedProject})
+    return res.status(200).json({message: 'employee removed from project successfully', deleted_employee: foundedEmployee})
 }
 
 export const updateProject: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
@@ -188,20 +178,25 @@ export const updateProject: RequestHandler = async (req: Request, res: Response,
             new ResponseError('Sorry, You Don\'t Have Permission To This Organization Projects Since You Don\'t It\'s Admin')
         )
     }
-    const updatedProject = await ProjectModel.updateOne(
+    const updatedProject = await ProjectModel.findByIdAndUpdate(
         {_id: projectId},
         req.body,
+        {new: true}
     ).populate([
         {
             path: 'employees',
             select: '-password'
+        },
+        {
+            path: 'scrumMaster',
+            select: '-password'
         }
     ])
-    if (!updatedProject.matchedCount) {
+    if (!updatedProject) {
         return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
     }
 
-    return res.status(200).json({message: `project (${project.projectName}) updated successfully`})
+    return res.status(200).json({message: `project (${project.projectName}) updated successfully`, updated_project: updatedProject})
 }
 
 export const getOrgProjects: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
@@ -327,17 +322,15 @@ export const deleteProject: RequestHandler = async (req: Request, res: Response,
             new ResponseError('Sorry, You Don\'t Have Permission To This Organization Projects Since You Don\'t It\'s Admin', 401)
         )
     }
-    if (!await project.deleteOne()) {
+    const deletedInfo = await ProjectModel.deleteOne({_id: project._id})
+    if (!deletedInfo.deletedCount) {
         return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
     }
     const sprints = await SprintModel.find({project: project._id})
     if (!sprints) {
-        return res.status(200).json({message: 'Project Deleted Successfully'})
+        return res.status(200).json({message: `project (${project.projectName}) deleted successfully`})
     }
-    const deletedSprints = await SprintModel.deleteMany({project: project._id})
-    if (!deletedSprints.deletedCount) {
-        return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
-    }
+    await SprintModel.deleteMany({project: project._id})
     for (let sprint of sprints) {
         await TaskModel.deleteMany({sprint, project: project._id})
     }

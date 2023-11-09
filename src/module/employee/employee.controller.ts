@@ -32,6 +32,10 @@ export const createEmployee: RequestHandler = async (
 			new ResponseError(`${ERROR_MESSAGES.conflict('Employee account')}`, 409)
 		);
 	}
+	const existAsAdmin = await AdminModel.findOne<AdminSchemaType>({email})
+	if (existAsAdmin) {
+		return next(new ResponseError('This Account Already Exist As an admin', 409))
+	}
 	const newEmployee = new EmployeeModel({
 		...req.body,
 		createdBy: admin?._id,

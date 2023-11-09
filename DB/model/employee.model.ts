@@ -22,6 +22,7 @@ const employeeSchema = new Schema<IEmployeeDocument>(
 			default: UserRole.EMPLOYEE,
 		},
 		lastChangePassword: { type: Date },
+		title: String,
 		experience: {type: Number, requied: true, max: [50, 'max experience years is 50']},
 		employmentType: {type: String, enum: EmploymentType, required: true},
 		createdBy: { type: Types.ObjectId, ref: 'Admin' },
