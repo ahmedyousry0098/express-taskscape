@@ -323,7 +323,7 @@ export const deleteAndReplaceEmployee: RequestHandler = async (req: Request, res
 	if (!altEmp) {
 		return next(new ResponseError(`${ERROR_MESSAGES.notFound('New Employee')}`))
 	} 
-	const deletedEmp = await EmployeeModel.findOne({_id: altEmpId, organization: orgId, role: UserRole.EMPLOYEE})
+	const deletedEmp = await EmployeeModel.findOne({_id: remEmpId, organization: orgId, role: UserRole.EMPLOYEE})
 	if (!deletedEmp) {
 		return next(new ResponseError(`${ERROR_MESSAGES.notFound('Employee')}`))
 	}
@@ -341,7 +341,15 @@ export const deleteAndReplaceEmployee: RequestHandler = async (req: Request, res
 		},
 		{
 			$pull: {employees: remEmpId},
-			$addToSet: {employees: altEmpId}
+		}
+	);
+	await ProjectModel.updateMany(
+		{
+			employees: {$in: remEmpId},
+			organization: orgId
+		},
+		{
+			$addToSet: {employees: remEmpId},
 		}
 	);
 
@@ -364,9 +372,13 @@ export const deleteAndReplaceScrum: RequestHandler = async (req: Request, res: R
 	if (!altScrum) {
 		return next(new ResponseError(`${ERROR_MESSAGES.notFound('Employee')}`))
 	} 
-	const deletedScrum = await EmployeeModel.findOne({_id: altScrumId, organization: orgId, role: UserRole.EMPLOYEE})
+	const deletedScrum = await EmployeeModel.findOne({_id: remScrumId, organization: orgId, role: UserRole.SCRUM_MASTER})
 	if (!deletedScrum) {
 		return next(new ResponseError(`${ERROR_MESSAGES.notFound('Employee')}`))
+	}
+	deletedScrum.isDeleted = true
+	if (!await deletedScrum.save()) {
+		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
 	}
 	if (user?.organization != altScrum?.organization.toString()) {
 		return next(new ResponseError('Sorry, You Don\'t Have Permission To This Organization Projects Since You Don\'t It\'s Admin', 401 ))

@@ -73,3 +73,8 @@ export const replaceEmployeeSchema = Joi.object({
 	orgId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
 	altEmpId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
 })
+export const replaceScrumSchema = Joi.object({
+	remScrumId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
+	orgId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
+	altScrumId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
+})

@@ -8,6 +8,7 @@ import {
 	forgetPasswordSchema,
 	getAllEmployeeForScrumSchema,
 	replaceEmployeeSchema,
+	replaceScrumSchema,
 	resetPasswordSchema,
 	updateProfilePhotoSchema,
 } from './employee.validation';
@@ -122,7 +123,7 @@ router.patch(
 
 router.patch(
 	'/del-and-replace-scrum/:remScrumId',
-	validate(replaceEmployeeSchema),
+	validate(replaceScrumSchema),
 	authAdmin,
 	asyncHandler(deleteAndReplaceScrum)
 )
