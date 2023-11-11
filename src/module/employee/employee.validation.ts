@@ -67,3 +67,9 @@ export const updateProfilePhotoSchema = Joi.object({
 export const deleteEmployeeSchema = Joi.object({
 	empId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
 }).required()
+
+export const replaceEmployeeSchema = Joi.object({
+	remEmpId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
+	orgId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
+	altEmpId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
+})

@@ -7,6 +7,7 @@ import {
 	deleteEmployeeSchema,
 	forgetPasswordSchema,
 	getAllEmployeeForScrumSchema,
+	replaceEmployeeSchema,
 	resetPasswordSchema,
 	updateProfilePhotoSchema,
 } from './employee.validation';
@@ -14,6 +15,8 @@ import { asyncHandler } from '../../utils/errHandling';
 import {
 	changeEmployeeStatus,
 	createEmployee,
+	deleteAndReplaceEmployee,
+	deleteAndReplaceScrum,
 	deleteEmployee,
 	employeeChangePassword,
 	employeeLogin,
@@ -110,4 +113,17 @@ router.patch(
 	asyncHandler(deleteEmployee)
 )
 
+router.patch(
+	'/del-and-replace-emp/:remEmpId',
+	validate(replaceEmployeeSchema),
+	authAdmin,
+	asyncHandler(deleteAndReplaceEmployee)
+)
+
+router.patch(
+	'/del-and-replace-scrum/:remScrumId',
+	validate(replaceEmployeeSchema),
+	authAdmin,
+	asyncHandler(deleteAndReplaceScrum)
+)
 export default router;

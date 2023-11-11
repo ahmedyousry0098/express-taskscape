@@ -15,6 +15,8 @@ import { ProjectModel } from '../../../DB/model/project.model';
 import cloudinary from '../../utils/cloudinary';
 import { resetPassowrdTemplate } from '../../utils/mail_templates/reset_password';
 import { generateRandomString } from '../../utils/randomCode';
+import { OrganizationModel } from '../../../DB/model/organization.model';
+import { TaskModel } from '../../../DB/model/task.model';
 
 export const createEmployee: RequestHandler = async (
 	req: Request,
@@ -292,7 +294,6 @@ export const deleteEmployee: RequestHandler = async (req: Request, res: Response
 	const user = req.user
 	const employee = await EmployeeModel.findOne<EmployeeSchemaType>({
 		_id: empId,
-		role: UserRole.EMPLOYEE
 	})
 	if (!employee) {
 		return next(new ResponseError(`${ERROR_MESSAGES.notFound('Employee')}`, 400))
@@ -310,4 +311,82 @@ export const deleteEmployee: RequestHandler = async (req: Request, res: Response
 		return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
 	}
 	return res.status(200).json({message: `Employee (${employee.employeeName}) deleted successfully`})
+}
+
+export const deleteAndReplaceEmployee: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+	const {remEmpId} = req.params
+	const user = req.user
+	const {altEmpId, orgId} = req.body
+	const altEmp = await EmployeeModel.findOne(
+		{_id: altEmpId, organization: orgId, role: UserRole.EMPLOYEE}
+	)
+	if (!altEmp) {
+		return next(new ResponseError(`${ERROR_MESSAGES.notFound('New Employee')}`))
+	} 
+	const deletedEmp = await EmployeeModel.findOne({_id: altEmpId, organization: orgId, role: UserRole.EMPLOYEE})
+	if (!deletedEmp) {
+		return next(new ResponseError(`${ERROR_MESSAGES.notFound('Employee')}`))
+	}
+	if (user?.organization != altEmp?.organization.toString()) {
+		return next(new ResponseError('Sorry, You Don\'t Have Permission To This Organization Projects Since You Don\'t It\'s Admin', 401 ))
+	}
+	deletedEmp.isDeleted = true
+	if (!await deletedEmp.save()) {
+		return new ResponseError(`Cannot Delete Existing Employee Please Try Again`, 500)
+	}
+	await ProjectModel.updateMany(
+		{
+			employees: {$in: remEmpId},
+			organization: orgId
+		},
+		{
+			$pull: {employees: remEmpId},
+			$addToSet: {employees: altEmpId}
+		}
+	);
+
+	await TaskModel.updateMany(
+		{
+			assignTo: remEmpId
+		},
+		{
+			assignTo: altEmpId
+		}
+	)
+	return res.status(200).json({message: 'Member Replaced Successfully'})
+}
+
+export const deleteAndReplaceScrum: RequestHandler = async (req: Request, res: Response, next: NextFunction) => {
+	const {remScrumId} = req.params
+	const user = req.user
+	const {altScrumId, orgId} = req.body
+	const altScrum = await EmployeeModel.findOne({_id: altScrumId, organization: orgId, role: UserRole.SCRUM_MASTER})
+	if (!altScrum) {
+		return next(new ResponseError(`${ERROR_MESSAGES.notFound('Employee')}`))
+	} 
+	const deletedScrum = await EmployeeModel.findOne({_id: altScrumId, organization: orgId, role: UserRole.EMPLOYEE})
+	if (!deletedScrum) {
+		return next(new ResponseError(`${ERROR_MESSAGES.notFound('Employee')}`))
+	}
+	if (user?.organization != altScrum?.organization.toString()) {
+		return next(new ResponseError('Sorry, You Don\'t Have Permission To This Organization Projects Since You Don\'t It\'s Admin', 401 ))
+	}
+	await ProjectModel.updateMany(
+		{
+			scrumMaster: remScrumId,
+			organization: orgId
+		},
+		{
+			scrumMaster: altScrumId
+		}
+	);
+	await TaskModel.updateMany(
+		{
+			scrumMaster: remScrumId
+		},
+		{
+			scrumMaster: altScrumId
+		}
+	)
+	return res.status(200).json({message: 'Scrum Master Replaced Successfully'})
 }
