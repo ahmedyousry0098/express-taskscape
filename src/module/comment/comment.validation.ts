@@ -14,18 +14,24 @@ interface IGetCommentsSchema {
 
 export const addCommentSchema = Joi.object<IAddCommentSchema>({
 	text: Joi.string().required(),
-	assignToTask: CUSTOM_FIELDS_SCHEMAS.objectId,
-	auther: CUSTOM_FIELDS_SCHEMAS.objectId,
-	date: Joi.date().min(new Date().toLocaleDateString()),
+	assignToTask: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
+	auther: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
+	date: Joi.date().min(new Date().toLocaleDateString()).messages({
+		'date.base': 'Date must be a valid date.',
+		'date.min': 'Date must be later than or equal to today.'
+	}),
 	taskId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
 }).required();
 
 export const editCommentSchema = Joi.object<IEditCommentSchema>({
 	text: Joi.string().required(),
-	date: Joi.date().min(new Date().toLocaleDateString()),
+	date: Joi.date().min(new Date().toLocaleDateString()).messages({
+		'date.base': 'Field must be a valid date.',
+		'date.min': 'Date must be later than or equal to today.'
+	}),
 	commentId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
 }).required();
 
 export const getCommentsSchema = Joi.object<IGetCommentsSchema>({
 	taskId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
-})
+}).required()

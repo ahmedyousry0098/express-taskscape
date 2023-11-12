@@ -14,8 +14,14 @@ interface ISprintId {
 
 export const createSprintSchema = Joi.object<ICreateSprintSchema>({
     sprint_name: Joi.string().required(),
-    start_date: Joi.date().min(new Date().toLocaleDateString()),
-    deadline: Joi.date().greater(Joi.ref('start_date')),
+    start_date: Joi.date().min(new Date().toLocaleDateString()).messages({
+		'date.base': 'Start Date must be a valid date.',
+		'date.min': 'Start Date must be later than or equal to today.'
+	}),
+    deadline: Joi.date().greater(Joi.ref('start_date')).messages({
+        'date.base': 'Deadline must be a valid date.',
+        'date.greater': 'Deadline must be later than the start date.'
+    }),
     projectId: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
     organization: CUSTOM_FIELDS_SCHEMAS.objectId,
 }).required()

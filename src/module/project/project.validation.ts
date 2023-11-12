@@ -36,8 +36,14 @@ interface IProjectId {
 export const createProjectSchema = Joi.object<ICreateProjectSchema>({
     projectName: Joi.string().required(),
     description: Joi.string(),
-    startDate: Joi.date().min(new Date().toLocaleDateString()),
-    deadline: Joi.date().greater(Joi.ref('startDate')),
+    startDate: Joi.date().min(new Date().toLocaleDateString()).messages({
+		'date.base': 'Start Date must be a valid date.',
+		'date.min': 'Start Date must be later than or equal to today.'
+	}),
+    deadline: Joi.date().greater(Joi.ref('startDate')).messages({
+        'date.base': 'Deadline must be a valid date.',
+        'date.greater': 'Deadline must be later than the start date.'
+    }),
     organization: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
     scrumMaster: CUSTOM_FIELDS_SCHEMAS.objectId.required(),
     employees: Joi.array().items(CUSTOM_FIELDS_SCHEMAS.objectId).required()
@@ -58,8 +64,14 @@ export const removeEmpoyeesFromProjectSchema = Joi.object<IRemoveEmpoyeesFromPro
 export const updateProjectSchema = Joi.object<IUpdateProjectSchema>({
     projectName: Joi.string(),
     description: Joi.string(),
-    startDate: Joi.date().min(new Date().toLocaleDateString()),
-    deadline: Joi.date().greater(Joi.ref('startDate')),
+    startDate: Joi.date().min(new Date().toLocaleDateString()).messages({
+		'date.base': 'Start Date must be a valid date.',
+		'date.min': 'Start Date must be later than or equal to today.'
+	}),
+    deadline: Joi.date().greater(Joi.ref('startDate')).messages({
+        'date.base': 'Deadline must be a valid date.',
+        'date.greater': 'Deadline must be later than the start date.'
+    }),
     projectId: CUSTOM_FIELDS_SCHEMAS.objectId.required()
 }).required()
 

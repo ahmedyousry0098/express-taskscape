@@ -5,3 +5,7 @@ export const ERROR_MESSAGES = Object.freeze({
     unavailableService: 'service not availale, please try again later',
     notFound: (obj: string) => `${obj} not found`
 })
+
+export const JOI_MESSAGES = Object.freeze({
+    // password
+})
