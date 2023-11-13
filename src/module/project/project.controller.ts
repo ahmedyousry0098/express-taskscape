@@ -59,6 +59,12 @@ export const createProject: RequestHandler = async (req: Request, res: Response,
     if (!savedProject) {
         return next(new ResponseError(`${ERROR_MESSAGES.serverErr}`))
     }
+    const scrumNotifications = await NotificationModel.create({
+        title: 'You Added To New Project!',
+        description: `${NotifyMessage.ADDED_TO_PROJECT(project.projectName, org.organization_name)}`,
+        to: scrum._id,
+    })
+    getIo().to(scrum.socketId).emit('pushNew', {msg: scrumNotifications.title})
     for (let emp of employeesFounded) {
         const newNotification = await NotificationModel.create({
             title: 'You Added To New Project!',

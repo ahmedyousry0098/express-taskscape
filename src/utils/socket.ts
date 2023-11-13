@@ -17,6 +17,8 @@ export const initIo = (httpServer: httpServer) => {
         socket.on('updateSocketId', async ({token}) => {
             const user = await socketAuth(token, socketId)
             if (!user) return io.emit('authFail', {message: 'Authenticaton Faild'})
+            const myNotifications = await NotificationModel.find({to: user._id})
+            io.to(user.socketId).emit('listenToNotificatons', {myNotifications})
             io.emit('connected')
         })
         
