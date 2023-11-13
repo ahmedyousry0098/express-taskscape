@@ -98,8 +98,7 @@ export const confirmOrganization: RequestHandler = async (
 	}
 	return res
 		.status(200)
-		.json({ message: 'Organization Verified Successfully' })
-		.redirect('https://taskscape-admin.vercel.app/login')
+		.redirect('https://taskscape-admin.vercel.app/login')	
 };
 
 export const updateOrganization: RequestHandler = async (

@@ -18,6 +18,6 @@ export function sendMail(mailOptions: IMailInfo) {
 
     return transporter.sendMail({
         ...mailOptions,
-        from: `"Taskspace Team" <${process.env.MAIL_USER}>`,
+        from: `"Taskscape Team" <${process.env.MAIL_USER}>`,
     })
 }

@@ -246,7 +246,7 @@ export function notificationMailTemp({
 								<ol>
 									<li>
 										Visit our application login page at
-										<a href="[Application URL]">[Application URL]</a>.
+										<a href="https://taskscape.vercel.app/home">taskscape</a>.
 									</li>
 									<li>
 										Use your username and the temporary password provided above
@@ -312,7 +312,7 @@ export function notificationMailTemp({
 																text-decoration: none;
 																border-radius: 6px;
 															"
-															>TASKSPACE</a
+															>TASKSCAPE</a
 														>
 													</td>
 												</tr>
