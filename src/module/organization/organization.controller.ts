@@ -86,15 +86,12 @@ export const confirmOrganization: RequestHandler = async (
 	const org = await OrganizationModel.findByIdAndUpdate<OrganizationSchemaType>(
 		decoded._id,
 		{ isVerified: true },
-		{ new: false }
+		{ new: true }
 	);
 	if (!org || org.isDeleted) {
 		return next(
 			new ResponseError(`${ERROR_MESSAGES.notFound('Organization')}`)
 		);
-	}
-	if (org.isVerified) {
-		return next(new ResponseError('Organization Already Verified', 400));
 	}
 	return res
 		.status(200)
